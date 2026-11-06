@@ -1,0 +1,16 @@
+name: Feature request
+description: Suggest a useful improvement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to achieve?
+      description: Describe the situation using fictional people and places.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour and available source evidence
+    validations:
+      required: true

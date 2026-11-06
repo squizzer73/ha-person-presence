@@ -1,0 +1,26 @@
+name: Bug report
+description: Report unexpected presence or configuration behaviour
+body:
+  - type: markdown
+    attributes:
+      value: "Use fictional names. Do not include coordinates, credentials, raw provider payloads or Bluetooth identity keys. Review diagnostics before sharing."
+  - type: input
+    id: versions
+    attributes:
+      label: Person Presence and Home Assistant Core versions
+    validations:
+      required: true
+  - type: textarea
+    id: providers
+    attributes:
+      label: Providers and device setup
+      description: Source integrations, device types, preference order, charging and worn rules.
+    validations:
+      required: true
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: Expected and observed behaviour
+      description: Include reproduction steps, Whereabouts and Decision output, source freshness and approximate delays.
+    validations:
+      required: true

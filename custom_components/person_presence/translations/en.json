@@ -1,0 +1,293 @@
+{
+  "title": "Person Presence",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Who should we locate?",
+        "description": "Choose an existing Home Assistant Person. A login is not required. Existing Person tracking and automations stay unchanged. Leave the name empty to use the person’s name.",
+        "data": {
+          "person": "Person",
+          "name": "Name"
+        }
+      },
+      "device": {
+        "title": "Add or edit a tracked device",
+        "description": "Name a logical phone, watch, tablet or tag. Its GPS, room and charging sources may come from different integrations. Type alone never proves that a watch is worn.",
+        "data": {
+          "name": "Name",
+          "device_type": "Device type"
+        }
+      },
+      "settings": {
+        "title": "Inference settings",
+        "description": "Changes apply after Save and reload this integration entry.",
+        "data": {
+          "name": "Name",
+          "gps_age": "Maximum GPS observation age (seconds)",
+          "room_age": "Maximum room observation age (seconds)",
+          "signal_age": "Maximum charging/worn signal age (seconds)",
+          "settle": "Settling time (seconds)",
+          "max_accuracy": "Maximum GPS error (metres)"
+        }
+      },
+      "edit": {
+        "title": "Edit device",
+        "description": "Choose a device to change its mappings or priority.",
+        "data": {
+          "device": "Device"
+        }
+      },
+      "remove": {
+        "title": "Remove device",
+        "description": "Choose the device to remove from inference.",
+        "data": {
+          "device": "Device"
+        }
+      },
+      "menu": {
+        "title": "Devices and settings",
+        "description": "Current order: {devices}\n\nUse Review and save to preview without changing the running entry.",
+        "menu_options": {
+          "add": "Add device",
+          "edit": "Edit device",
+          "remove": "Remove device",
+          "move_earlier": "Move a device earlier",
+          "move_later": "Move a device later",
+          "settings": "Advanced timing and accuracy",
+          "finish": "Review and save"
+        }
+      },
+      "source_mode": {
+        "title": "Choose source selection",
+        "description": "Filtered sources show recognized capabilities. Use advanced manual mapping for unsupported providers or to repair renamed sources. Suggested mappings must be confirmed.",
+        "menu_options": {
+          "sources": "Choose filtered sources",
+          "manual_sources": "Advanced manual mapping"
+        }
+      },
+      "sources": {
+        "title": "Choose this device’s sources",
+        "description": "GPS must report a geographical position; Bluetooth home/away cannot identify an outdoor zone. A room sensor should have its matching local home/away guard. Wearing is optional and cannot be inferred from not charging. Manual sources require checking their meaning in preview.",
+        "data": {
+          "tracker": "Geographical tracker",
+          "room": "Room or area sensor",
+          "local_tracker": "Local home/away guard",
+          "charging": "Charging status",
+          "worn": "Worn/on-body status",
+          "timestamp_entity": "Observation timestamp source",
+          "timestamp_attribute": "Timestamp attribute (advanced)",
+          "manual_sources": "Advanced manual sources"
+        },
+        "data_description": {
+          "tracker": "Use a position-capable tracker. Old observations remain old even when the entity updates.",
+          "room": "Choose a room/area string sensor, not a distance, temperature or battery level.",
+          "charging": "Choose Charging/Not Charging or a charging binary sensor; numeric battery level is unsuitable.",
+          "worn": "Use a real on-body or worn signal. Without one, a watch left on a table can remain selected.",
+          "local_tracker": "Recommended for Bluetooth room inference; it must belong to the same physical device.",
+          "timestamp_entity": "Optional override for an actual observation time; time-of-day alone is not sufficient.",
+          "timestamp_attribute": "Use a full-date timestamp attribute such as last_located, not a display-only clock value."
+        }
+      },
+      "rules": {
+        "title": "Set preference and eligibility",
+        "description": "Lower preference numbers are considered first; confirmed worn evidence takes precedence. Charging phones may still be carried in cars or pockets. Only exclude them when that matches your use.",
+        "data": {
+          "priority": "Preference (lower first)",
+          "wearable": "Exclude this wearable while charging",
+          "exclude_charging": "Also exclude a charging phone/tablet"
+        }
+      },
+      "preview": {
+        "title": "Review proposed whereabouts",
+        "description": "{summary}\n\nThis is an unsaved snapshot, not a physical verification. Normal operation uses your configured settling period.",
+        "menu_options": {
+          "save": "Save these settings",
+          "menu": "Back to devices and settings"
+        }
+      },
+      "move_earlier": {
+        "title": "Move earlier",
+        "data": {
+          "device": "Device"
+        }
+      },
+      "move_later": {
+        "title": "Move later",
+        "data": {
+          "device": "Device"
+        }
+      }
+    },
+    "error": {
+      "invalid_person": "Select an existing Person and enter a name.",
+      "invalid_settings": "Enter valid timing and accuracy limits.",
+      "no_devices": "Add at least one device.",
+      "invalid_device": "Give each device a unique name and priority and a GPS tracker or room sensor.",
+      "duplicate_source": "Each geographical tracker or room sensor may belong to only one device.",
+      "self_reference": "This integration cannot use its own outputs as inputs.",
+      "source_missing": "A selected source does not exist in the current state list.",
+      "last_device": "Keep at least one device; remove the integration entry to stop tracking.",
+      "unsupported_source": "This source does not expose the expected capability. Choose a suitable source or use advanced manual mapping and review its meaning."
+    },
+    "abort": {
+      "invalid_person": "Select an existing Person and enter a name.",
+      "invalid_settings": "Enter valid timing and accuracy limits.",
+      "no_devices": "Add at least one device.",
+      "invalid_device": "Give each device a unique name and priority and a GPS tracker or room sensor.",
+      "duplicate_source": "Each geographical tracker or room sensor may belong to only one device.",
+      "self_reference": "This integration cannot use its own outputs as inputs.",
+      "source_missing": "A selected source does not exist in the current state list.",
+      "last_device": "Keep at least one device; remove the integration entry to stop tracking.",
+      "already_configured": "This person already has a Person Presence entry.",
+      "unsupported_source": "This source does not expose the expected capability. Choose a suitable source or use advanced manual mapping and review its meaning."
+    }
+  },
+  "options": {
+    "step": {
+      "user": {
+        "title": "Who should we locate?",
+        "description": "Choose an existing Home Assistant Person. A login is not required. Existing Person tracking and automations stay unchanged. Leave the name empty to use the person’s name.",
+        "data": {
+          "person": "Person",
+          "name": "Name"
+        }
+      },
+      "device": {
+        "title": "Add or edit a tracked device",
+        "description": "Name a logical phone, watch, tablet or tag. Its GPS, room and charging sources may come from different integrations. Type alone never proves that a watch is worn.",
+        "data": {
+          "name": "Name",
+          "device_type": "Device type"
+        }
+      },
+      "settings": {
+        "title": "Inference settings",
+        "description": "Changes apply after Save and reload this integration entry.",
+        "data": {
+          "name": "Name",
+          "gps_age": "Maximum GPS observation age (seconds)",
+          "room_age": "Maximum room observation age (seconds)",
+          "signal_age": "Maximum charging/worn signal age (seconds)",
+          "settle": "Settling time (seconds)",
+          "max_accuracy": "Maximum GPS error (metres)"
+        }
+      },
+      "edit": {
+        "title": "Edit device",
+        "description": "Choose a device to change its mappings or priority.",
+        "data": {
+          "device": "Device"
+        }
+      },
+      "remove": {
+        "title": "Remove device",
+        "description": "Choose the device to remove from inference.",
+        "data": {
+          "device": "Device"
+        }
+      },
+      "menu": {
+        "title": "Devices and settings",
+        "description": "Current order: {devices}\n\nUse Review and save to preview without changing the running entry.",
+        "menu_options": {
+          "add": "Add device",
+          "edit": "Edit device",
+          "remove": "Remove device",
+          "move_earlier": "Move a device earlier",
+          "move_later": "Move a device later",
+          "settings": "Advanced timing and accuracy",
+          "finish": "Review and save"
+        }
+      },
+      "source_mode": {
+        "title": "Choose source selection",
+        "description": "Filtered sources show recognized capabilities. Use advanced manual mapping for unsupported providers or to repair renamed sources. Suggested mappings must be confirmed.",
+        "menu_options": {
+          "sources": "Choose filtered sources",
+          "manual_sources": "Advanced manual mapping"
+        }
+      },
+      "sources": {
+        "title": "Choose this device’s sources",
+        "description": "GPS must report a geographical position; Bluetooth home/away cannot identify an outdoor zone. A room sensor should have its matching local home/away guard. Wearing is optional and cannot be inferred from not charging. Manual sources require checking their meaning in preview.",
+        "data": {
+          "tracker": "Geographical tracker",
+          "room": "Room or area sensor",
+          "local_tracker": "Local home/away guard",
+          "charging": "Charging status",
+          "worn": "Worn/on-body status",
+          "timestamp_entity": "Observation timestamp source",
+          "timestamp_attribute": "Timestamp attribute (advanced)",
+          "manual_sources": "Advanced manual sources"
+        },
+        "data_description": {
+          "tracker": "Use a position-capable tracker. Old observations remain old even when the entity updates.",
+          "room": "Choose a room/area string sensor, not a distance, temperature or battery level.",
+          "charging": "Choose Charging/Not Charging or a charging binary sensor; numeric battery level is unsuitable.",
+          "worn": "Use a real on-body or worn signal. Without one, a watch left on a table can remain selected.",
+          "local_tracker": "Recommended for Bluetooth room inference; it must belong to the same physical device.",
+          "timestamp_entity": "Optional override for an actual observation time; time-of-day alone is not sufficient.",
+          "timestamp_attribute": "Use a full-date timestamp attribute such as last_located, not a display-only clock value."
+        }
+      },
+      "rules": {
+        "title": "Set preference and eligibility",
+        "description": "Lower preference numbers are considered first; confirmed worn evidence takes precedence. Charging phones may still be carried in cars or pockets. Only exclude them when that matches your use.",
+        "data": {
+          "priority": "Preference (lower first)",
+          "wearable": "Exclude this wearable while charging",
+          "exclude_charging": "Also exclude a charging phone/tablet"
+        }
+      },
+      "preview": {
+        "title": "Review proposed whereabouts",
+        "description": "{summary}\n\nThis is an unsaved snapshot, not a physical verification. Normal operation uses your configured settling period.",
+        "menu_options": {
+          "save": "Save these settings",
+          "menu": "Back to devices and settings"
+        }
+      },
+      "move_earlier": {
+        "title": "Move earlier",
+        "data": {
+          "device": "Device"
+        }
+      },
+      "move_later": {
+        "title": "Move later",
+        "data": {
+          "device": "Device"
+        }
+      }
+    },
+    "error": {
+      "invalid_person": "Select an existing Person and enter a name.",
+      "invalid_settings": "Enter valid timing and accuracy limits.",
+      "no_devices": "Add at least one device.",
+      "invalid_device": "Give each device a unique name and priority and a GPS tracker or room sensor.",
+      "duplicate_source": "Each geographical tracker or room sensor may belong to only one device.",
+      "self_reference": "This integration cannot use its own outputs as inputs.",
+      "source_missing": "A selected source does not exist in the current state list.",
+      "last_device": "Keep at least one device; remove the integration entry to stop tracking.",
+      "unsupported_source": "This source does not expose the expected capability. Choose a suitable source or use advanced manual mapping and review its meaning."
+    },
+    "abort": {
+      "invalid_person": "Select an existing Person and enter a name.",
+      "invalid_settings": "Enter valid timing and accuracy limits.",
+      "no_devices": "Add at least one device.",
+      "invalid_device": "Give each device a unique name and priority and a GPS tracker or room sensor.",
+      "duplicate_source": "Each geographical tracker or room sensor may belong to only one device.",
+      "self_reference": "This integration cannot use its own outputs as inputs.",
+      "source_missing": "A selected source does not exist in the current state list.",
+      "last_device": "Keep at least one device; remove the integration entry to stop tracking.",
+      "already_configured": "This person already has a Person Presence entry.",
+      "unsupported_source": "This source does not expose the expected capability. Choose a suitable source or use advanced manual mapping and review its meaning."
+    }
+  },
+  "issues": {
+    "missing_sources": {
+      "title": "Person Presence source needs attention",
+      "description": "These configured source entities are missing: {sources}.\n\n[Configure Person Presence](/config/integrations/integration/person_presence) and edit the affected device mappings. Existing settings are retained. Temporary stale GPS and normal away Bluetooth are not configuration repairs."
+    }
+  }
+}
