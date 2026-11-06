@@ -1,6 +1,7 @@
 [
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/feature_request.yml",
+  ".github/workflows/publish-beta.yml",
   ".github/workflows/validate.yml",
   ".gitignore",
   "CHANGELOG.md",
