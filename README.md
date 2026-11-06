@@ -6,9 +6,33 @@
 
 [![Set up Person Presence](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=person_presence)
 
-Turn existing phone, watch and room-tracking entities into an explainable answer to “where is this person?” Version 0.2.0b1 is a beta. [Download the 0.2.0b1 prerelease](https://github.com/squizzer73/ha-person-presence/releases/tag/0.2.0b1). Catalog inclusion is pending.
+## Why I built this
 
-Requires Home Assistant Core 2026.11 or later. Validation targets 2026.11.0; later releases need compatibility checks. No new account, cloud service or device commands. Existing providers such as the Companion app, iCloud3 and Bermuda supply observations.
+I built Person Presence because I wanted a more realistic answer to a fairly simple question: **where is everyone?**
+
+In my case, I use it to help show people's actual location on my Home Assistant dashboards, whether they are at home or out and about. At home, I'd like to know which room they are in. Away from home, I'd like to show the zone they are in, or just that they are away if that is all the available information can tell me.
+
+The bit I wanted to try and fix was the difference between knowing where someone's devices are and knowing where the person is. A phone, watch and iPad can all belong to the same person, but they aren't always with them.
+
+For example, I might have my phone in my pocket and my watch on charge in the bedroom, while I'm sitting in the lounge. Or my phone might be in the kitchen while I'm wearing my watch in the lounge. I might even leave my phone charging at home and take the dog for a walk with just my watch. I'd like the dashboard to follow me through those situations, rather than continue showing the location of a device I've left behind.
+
+That is what this integration is trying to do. You associate devices with a person, put them in your preferred order, and give it the location, room, charging and wearing information you already have. It uses that information to decide which device to follow and provides a combined **Whereabouts** sensor for dashboards, automations and notifications. You can also see which device it selected and why.
+
+It still needs useful information from your existing tracking integrations. It can't know that a watch is being worn without a suitable signal, or place you in the woods without a fresh outdoor location from the device you took with you. If the information is too old or conflicting, Unknown can be the right answer. The aim is a more useful location, not a confident guess.
+
+## A note on how this was built
+
+This has been **“Vibe Coded”** using AI assistance, with lots of consultation, questions, back and forth and testing along the way. I started with the situations I wanted it to handle and worked through how it should behave, what information it could use, and what it should do when that information wasn't available.
+
+I'm using it on my own system, but it is still a beta and there will be setups and situations I haven't covered. I'm very much open to suggestions, bugs, changes, ideas, or a better way of doing something. If you try it and something doesn't make sense, please let me know. Feedback from other people's homes and devices will help make it more useful.
+
+You can [report a bug or suggest an idea here](https://github.com/squizzer73/ha-person-presence/issues).
+
+## Before you start
+
+Version **0.2.0b1** is a public beta. [Download the prerelease](https://github.com/squizzer73/ha-person-presence/releases/tag/0.2.0b1), or use the Marketplace button above to add it as a custom repository. It isn't in the shared catalog yet.
+
+You'll need **Home Assistant Core 2026.11 or later**. Testing currently targets 2026.11.0; later releases need compatibility checks. Existing integrations such as the Companion app, iCloud3 and Bermuda supply the observations. Person Presence doesn't add a cloud account or location service, and doesn't send commands to your devices.
 
 ## Setup
 
@@ -23,9 +47,9 @@ Add the repository using the Marketplace button above. Select beta/prerelease ve
 
 Configure later to add/edit/remove devices, move their preferences, adjust advanced limits and preview unsaved changes. Deleted source entities create a Repair that links back to configuration. A preview does not save an entry or change current tracking.
 
-## Outputs
+## What you get
 
-**Whereabouts** is the primary sensor: an actual room name when home with fresh room evidence, Home when only home is known, an actual zone name when away in a zone, Away elsewhere, or native Unknown when evidence is insufficient.
+**Whereabouts** is the main sensor to put on your dashboard. It shows a room name when there is fresh room information at home, Home when only home is known, a zone name when away in a known zone, Away elsewhere, or Unknown when there isn’t enough reliable information.
 
 Use `presence` (`home` / `away` / `unknown`), `context` (`room` / `zone` / `home` / `away` / `unknown`), `area_id` and `zone_id` for automations. A room and a zone can have the same displayed name. Other attributes identify the selected logical device, source entity, confidence category, wearing status and settling. Confidence is not a numerical probability or proof the device is carried.
 
@@ -69,7 +93,9 @@ Tests use fictional households and a real temporary HA Core instance, including 
 
 ## Support and contributions
 
-Maintained by [@squizzer73](https://github.com/squizzer73). See [support](SUPPORT.md), [contributing](CONTRIBUTING.md) and [security reporting](SECURITY.md). Field reports should include expected versus observed behaviour and delays; never include real coordinates, credentials or Bluetooth identity keys.
+I'm [@squizzer73](https://github.com/squizzer73). Suggestions, bug reports, changes and ideas are all welcome. If you're reporting a problem, let me know what you expected, what actually happened, which providers you're using and roughly how long the updates took. Please use fictional names and leave out real coordinates, credentials and Bluetooth identity keys.
+
+See [support](SUPPORT.md), [contributing](CONTRIBUTING.md) and [security reporting](SECURITY.md) for the details.
 
 ## Licence
 
