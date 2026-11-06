@@ -57,7 +57,7 @@ Configure later to add/edit/remove devices, move their preferences, adjust advan
 
 Use `presence` (`home` / `away` / `unknown`), `context` (`room` / `zone` / `home` / `away` / `unknown`), `area_id` and `zone_id` for automations. A room and a zone can have the same displayed name. Other attributes identify the selected logical device, source entity, confidence category, wearing status and settling. Confidence is not a numerical probability or proof the device is carried.
 
-Location, Room, Selected device and Decision remain available. The optional tracker and the Last known whereabouts / Last observation time diagnostics are disabled by default. Last-known data is historical, held only during the current HA run, and never substituted for the current answer. Volatile timing details are available in diagnostics/preview; unchanged heartbeats do not publish new semantic state.
+Location, Room, Selected device and Decision remain available. The optional tracker and the Last known whereabouts / Last observation time diagnostics are disabled by default. Those legacy diagnostics keep their memory-only behaviour for the current HA run. The new Dashboard whereabouts history is stored separately across restarts and is never substituted for the strict current answer. Volatile timing details are available in diagnostics/preview; unchanged heartbeats do not publish new semantic state.
 
 The integration remains independent of existing Person assignments and automations. Enabling or attaching its optional tracker is a separate user decision. It does not automatically take over household tracking.
 
