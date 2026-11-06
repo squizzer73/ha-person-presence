@@ -1,17 +1,17 @@
 {
   "domain": "person_presence",
   "name": "Person Presence",
-  "version": "0.2.0b1",
-  "config_flow": true,
+  "categories": [
+    "presence_location"
+  ],
   "codeowners": [
     "@squizzer73"
   ],
-  "iot_class": "local_push",
-  "integration_type": "service",
-  "requirements": [],
+  "config_flow": true,
   "documentation": "https://github.com/squizzer73/ha-person-presence",
+  "integration_type": "service",
+  "iot_class": "local_push",
   "issue_tracker": "https://github.com/squizzer73/ha-person-presence/issues",
-  "categories": [
-    "presence_location"
-  ]
+  "requirements": [],
+  "version": "0.2.0b1"
 }
