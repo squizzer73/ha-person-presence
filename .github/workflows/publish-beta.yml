@@ -1,9 +1,12 @@
-name: Publish approved 0.2.0b1 beta
+name: Publish approved 0.2.0b2 beta
 on:
+  push:
+    branches: [main]
+    paths: [.github/release-requests/0.2.0b2.json]
   workflow_dispatch:
 permissions: {}
 concurrency:
-  group: publish-person-presence-0.2.0b1
+  group: publish-person-presence-0.2.0b2
   cancel-in-progress: false
 jobs:
   publish:
@@ -15,18 +18,19 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: squizzer73/ha-person-presence
-      RELEASE_SHA: 80b07bd57d134b3a7de52696b793ad4dac780081
-      RELEASE_TAG: 0.2.0b1
+      RELEASE_SHA: 60b4e04c6e5ddaf42c56256a64937f7020126fd7
+      RELEASE_TAG: 0.2.0b2
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 80b07bd57d134b3a7de52696b793ad4dac780081
+          ref: 60b4e04c6e5ddaf42c56256a64937f7020126fd7
           persist-credentials: false
       - name: Verify the approved commit passed all required checks
         shell: bash
         run: |
-          gh api repos/$GH_REPO/actions/runs/42197883378 > "$RUNNER_TEMP/approved-run.json"
-          gh api repos/$GH_REPO/actions/runs/42197883378/jobs > "$RUNNER_TEMP/approved-jobs.json"
+          gh run watch 42217187794 --exit-status --interval 10
+          gh api repos/$GH_REPO/actions/runs/42217187794 > "$RUNNER_TEMP/approved-run.json"
+          gh api repos/$GH_REPO/actions/runs/42217187794/jobs > "$RUNNER_TEMP/approved-jobs.json"
           python3 - <<'PY'
           import json, os
           from pathlib import Path
@@ -48,28 +52,11 @@ jobs:
           python3 - <<'PY'
           import hashlib
           from pathlib import Path
-          assert hashlib.sha256(Path('person-presence-0.2.0b1.zip').read_bytes()).hexdigest() == 'c4b3ae31fcb8680332898bff496e76bdd054331d75ed292be51c4cb8c364d014'
+          assert hashlib.sha256(Path('person-presence-0.2.0b2.zip').read_bytes()).hexdigest() == 'c49a555ab399c5d493d43a882fa5e9a24b538310d3f6e4d5334959dfa4956130'
           PY
       - name: Prepare public beta notes
-        run: |
-          cat > "$RUNNER_TEMP/release-notes.md" <<'NOTES'
-          First public beta of Person Presence for Home Assistant Core 2026.11 or later.
-
-          - Combines existing phone, watch and room observations into a Whereabouts sensor: room, Home, zone, Away or Unknown.
-          - Guided per-person setup, capability-filtered entity choices, device preference ordering and an unsaved decision preview.
-          - Source health, Repairs, private integration diagnostics and optional last-known diagnostics.
-          - Preserves existing configuration, entity identities and user enablement choices when upgrading.
-          - MIT licensed; no telemetry, new cloud account or device-control commands.
-
-          Validation: 71 tests, lint, formatting, type checks, deterministic packaging, hassfest and Marketplace validation passed for the exact tagged commit. No checks were ignored. Catalog inclusion is separate.
-
-          This is a beta. Physical acceptance and provider coverage remain incomplete. Wearing is unconfirmed without an actual on-body source. Watch-only outdoor tracking needs fresh location observations from the carried watch's provider; this integration cannot manufacture them. Stale or conflicting evidence may correctly produce Unknown.
-
-          Installation: extract the attached ZIP into your Home Assistant configuration directory so it contains custom_components/person_presence, then follow the README setup instructions. Back up before upgrading, restart HA after an update, and compare the result with real device movements. Review source mappings before using this beta in automations.
-
-          SHA256SUMS applies to the attached install ZIP. GitHub's automatic source archives contain the full repository, not the install-only package.
-          NOTES
+        run: cp docs/releases/0.2.0b2.md "$RUNNER_TEMP/release-notes.md"
       - name: Create a draft with both assets, then publish as a prerelease
         run: |
-          gh release create "$RELEASE_TAG" dist/beta/person-presence-0.2.0b1.zip dist/beta/SHA256SUMS --target "$RELEASE_SHA" --title "Person Presence 0.2.0b1 — public beta" --notes-file "$RUNNER_TEMP/release-notes.md" --draft --prerelease
+          gh release create "$RELEASE_TAG" dist/beta/person-presence-0.2.0b2.zip dist/beta/SHA256SUMS --target "$RELEASE_SHA" --title "Person Presence 0.2.0b2 — public beta" --notes-file "$RUNNER_TEMP/release-notes.md" --draft --prerelease
           gh release edit "$RELEASE_TAG" --draft=false --prerelease --latest=false

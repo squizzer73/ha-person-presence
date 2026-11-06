@@ -2,6 +2,7 @@
   ".github/ISSUE_TEMPLATE/beta_feedback.yml",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/feature_request.yml",
+  ".github/release-requests/0.2.0b2.json",
   ".github/workflows/publish-beta.yml",
   ".github/workflows/validate.yml",
   ".gitignore",
