@@ -12,17 +12,21 @@
 
 Manifest documentation and issue URLs target the approved repository. Support and contribution guidance, bug/feature issue forms, an original teal person/location icon and least-privilege validation workflow are included. The release-file allowlist excludes household deployment files, live screenshots, private configuration and credentials.
 
-## Still required
+## Published beta
 
-The approved 59-file export is uploaded to the public repository. The owner added the description and topics; issues are enabled. No household files are included.
+The owner approved publishing the prerelease on 6 November 2026. [0.2.0b1](https://github.com/squizzer73/ha-person-presence/releases/tag/0.2.0b1) tags commit `80b07bd57d134b3a7de52696b793ad4dac780081`, which passed all three required validation jobs in run 42197883378. No checks were ignored.
 
-GitHub hassfest and the test/build job passed at commit `7445f51b193250dec1de9f352a63a454e7d4b583`. Marketplace validation also passed after the metadata correction. No checks were ignored.
+The publication workflow verified that exact successful run, rebuilt the pinned commit, checked the expected SHA256, attached the install ZIP and SHA256SUMS to a draft, then published it as a prerelease. Both public downloads, ZIP contents, tag and checksum were independently read back. Install ZIP SHA256: `c4b3ae31fcb8680332898bff496e76bdd054331d75ed292be51c4cb8c364d014`.
 
-1. Retain green validation for the release commit.
-2. Verify repository metadata and enable GitHub private vulnerability reporting before advertising a private reporting URL.
-3. Record final external validation results before publishing a packaged release.
-4. Obtain approval for the concrete public repository/release contents, then publish a full GitHub prerelease with the versioned install ZIP and checksums. A tag alone is not a release.
-5. Distribute a custom-repository link and collect field feedback. Catalog submission is a separate step after the required checks pass.
+The public repository has its description/topics and issues enabled. The exact export excludes household deployment files, live screenshots, private configuration and credentials. The README provides a custom-repository Marketplace link; inclusion in the shared catalog is not claimed.
+
+## Remaining work
+
+1. Collect field feedback and verify provider/wearing behaviour.
+2. Enable a private security-reporting channel before advertising a private reporting URL.
+3. Decide when to issue a stable release and request catalog inclusion. Catalog submission remains a separate authorized action.
+
+The historical publishing workflow is now manual-only so routine documentation changes cannot trigger another publication. Future versions need their own reviewed target, validation evidence and checksum.
 
 Field acceptance remains incomplete, especially wearing detection and watch-only outdoor provider updates. Do not describe this beta as physically proven or catalog approved. The existing household pilot is unchanged by these local preparation edits.
 

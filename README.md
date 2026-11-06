@@ -2,13 +2,17 @@
 
 ![Person Presence icon](custom_components/person_presence/brand/icon.png)
 
+[![Open in the Marketplace](https://my.home-assistant.io/badges/marketplace_repository.svg)](https://my.home-assistant.io/redirect/marketplace_repository/?owner=squizzer73&repository=ha-person-presence&category=integration)
+
 [![Set up Person Presence](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=person_presence)
 
-Turn existing phone, watch and room-tracking entities into an explainable answer to “where is this person?” Version 0.2.0b1 is a beta. The public repository is available; a packaged GitHub release and catalog inclusion are pending.
+Turn existing phone, watch and room-tracking entities into an explainable answer to “where is this person?” Version 0.2.0b1 is a beta. [Download the 0.2.0b1 prerelease](https://github.com/squizzer73/ha-person-presence/releases/tag/0.2.0b1). Catalog inclusion is pending.
 
 Requires Home Assistant Core 2026.11 or later. Validation targets 2026.11.0; later releases need compatibility checks. No new account, cloud service or device commands. Existing providers such as the Companion app, iCloud3 and Bermuda supply observations.
 
 ## Setup
+
+Add the repository using the Marketplace button above. Select beta/prerelease versions if your client hides them. Alternatively download the install ZIP from the release page and use the manual steps below.
 
 1. Install `custom_components/person_presence` from the candidate ZIP into your HA configuration directory, then restart HA.
 2. Open Settings → Devices & services → Add integration → Person Presence.

@@ -1,8 +1,5 @@
 name: Publish approved 0.2.0b1 beta
 on:
-  push:
-    branches: [main]
-    paths: [.github/workflows/publish-beta.yml]
   workflow_dispatch:
 permissions: {}
 concurrency:

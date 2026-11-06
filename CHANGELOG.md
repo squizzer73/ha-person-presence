@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0b1 — local candidate
+## 0.2.0b1 — public beta, 6 November 2026
 
 - Adds an additive Whereabouts sensor and independent last-known diagnostics.
 - Explains every configured device and equal-time conflicting evidence.
@@ -11,4 +11,4 @@
 
 - Prepares approved repository/maintainer metadata, MIT licensing, original branding, support guidance and issue forms.
 
-Public publication, external validation and physical acceptance remain separate gates.
+Published as a GitHub prerelease after tests, hassfest and Marketplace validation passed. Physical acceptance and catalog inclusion remain separate milestones.
