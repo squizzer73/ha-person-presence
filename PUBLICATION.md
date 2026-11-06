@@ -23,7 +23,7 @@ The public repository has its description/topics and issues enabled. The exact e
 ## Remaining work
 
 1. Collect field feedback and verify provider/wearing behaviour.
-2. Enable a private security-reporting channel before advertising a private reporting URL.
+2. Keep the security policy current. GitHub private vulnerability reporting was enabled by the owner and verified on 6 November 2026; SECURITY.md links to the private report form.
 3. Decide when to issue a stable release and request catalog inclusion. Catalog submission remains a separate authorized action.
 
 The historical publishing workflow is now manual-only so routine documentation changes cannot trigger another publication. Future versions need their own reviewed target, validation evidence and checksum.
