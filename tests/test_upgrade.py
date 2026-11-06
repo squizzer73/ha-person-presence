@@ -58,7 +58,7 @@ async def exercise_legacy_upgrade(test):
                     ),
                     before[entity.unique_id],
                 )
-        test.assertEqual(len(after), len(before) + 3)
+        test.assertEqual(len(after), len(before) + 4)
         test.assertIsNone(
             next(e for e in after if e.unique_id.endswith("_whereabouts")).disabled_by
         )

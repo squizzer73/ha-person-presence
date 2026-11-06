@@ -30,7 +30,7 @@ You can [report a bug or suggest an idea here](https://github.com/squizzer73/ha-
 
 ## Before you start
 
-Version **0.2.0b1** is a public beta. [Download the prerelease](https://github.com/squizzer73/ha-person-presence/releases/tag/0.2.0b1), or use the Marketplace button above to add it as a custom repository. It isn't in the shared catalog yet.
+Version **0.2.0b2** is a public beta. [Download the prerelease](https://github.com/squizzer73/ha-person-presence/releases/tag/0.2.0b2), or use the Marketplace button above to add it as a custom repository. It isn't in the shared catalog yet.
 
 You'll need **Home Assistant Core 2026.11 or later**. Testing currently targets 2026.11.0; later releases need compatibility checks. Existing integrations such as the Companion app, iCloud3 and Bermuda supply the observations. Person Presence doesn't add a cloud account or location service, and doesn't send commands to your devices.
 
@@ -49,13 +49,31 @@ Configure later to add/edit/remove devices, move their preferences, adjust advan
 
 ## What you get
 
-**Whereabouts** is the main sensor to put on your dashboard. It shows a room name when there is fresh room information at home, Home when only home is known, a zone name when away in a known zone, Away elsewhere, or Unknown when there isn’t enough reliable information.
+**Dashboard whereabouts** is the one I would use for a display that stays useful between location updates. It shows the current answer when there is enough fresh information. Otherwise, it shows the last accepted location with an explicit **“(last known)”** label and its original observation timestamp. That history survives a restart. The [dashboard history example](docs/dashboard-history.md) shows how to display its age too.
+
+**Whereabouts** remains the strict current-location sensor. Use this one and its attributes for current-location automations; it can correctly become Unknown while the dashboard still shows an older, labelled location.
+
+**Whereabouts** reports the accepted current location. It shows a room name when there is fresh room information at home, Home when only home is known, a zone name when away in a known zone, Away elsewhere, or Unknown when there isn’t enough reliable information.
 
 Use `presence` (`home` / `away` / `unknown`), `context` (`room` / `zone` / `home` / `away` / `unknown`), `area_id` and `zone_id` for automations. A room and a zone can have the same displayed name. Other attributes identify the selected logical device, source entity, confidence category, wearing status and settling. Confidence is not a numerical probability or proof the device is carried.
 
 Location, Room, Selected device and Decision remain available. The optional tracker and the Last known whereabouts / Last observation time diagnostics are disabled by default. Last-known data is historical, held only during the current HA run, and never substituted for the current answer. Volatile timing details are available in diagnostics/preview; unchanged heartbeats do not publish new semantic state.
 
 The integration remains independent of existing Person assignments and automations. Enabling or attaching its optional tracker is a separate user decision. It does not automatically take over household tracking.
+
+## Using iCloud3
+
+One thing that came up while using this was the gap between how often a provider updates and how long a location should count as current. If a phone is sitting in a zone and iCloud3 checks it every 30 minutes or two hours, our default five-minute GPS limit will expire between checks. That doesn't necessarily mean the integration has stopped working.
+
+The new Dashboard whereabouts sensor is there for that situation: it can say **Gym (last known)** and retain the original observation time, while the current Whereabouts sensor says Unknown. It needs at least one accepted observation after upgrading before it has history to keep; it won't copy an already-rejected old fix into a new person's history.
+
+If you're using iCloud3, have a look at the device's **in-zone interval**, its configured Apple device and Companion App mapping, and the actual age of the location it is receiving. iCloud3 can use Apple and Companion App data, and its tracking schedule depends on the device and location. See the [iCloud3 documentation](https://github.com/gcobb321/icloud3).
+
+It may be worth trying a shorter in-zone interval on one phone first, then checking update behaviour and battery use before changing everything. More polling doesn't guarantee Apple will return a newer location. If a device only has a Companion App source, its background location updates need to be working too.
+
+Person Presence uses iCloud3's actual location observation time, not simply the time HA last updated the entity. Increasing the age limit just to keep the sensor populated also makes it willing to accept older information as current, so think about the behaviour you want before changing it. Charging and wearing signals can expire separately as well.
+
+Installing Person Presence doesn't change iCloud3 settings, request extra location updates or fix the provider's delivery. For a watch-only trip, the watch's provider still needs to supply an independent outdoor fix.
 
 ## Rules and limits
 

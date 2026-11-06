@@ -149,7 +149,7 @@ class HomeAssistantTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(runtime.data.room, "Library")
         registry = er.async_get(self.hass)
         entities = er.async_entries_for_config_entry(registry, entry.entry_id)
-        self.assertEqual(len(entities), 8)
+        self.assertEqual(len(entities), 9)
         tracker = next(e for e in entities if e.domain == "device_tracker")
         self.assertIsNotNone(tracker.disabled_by)
         self.assertIsNone(self.hass.states.get(tracker.entity_id))
@@ -184,10 +184,11 @@ class HomeAssistantTests(unittest.IsolatedAsyncioTestCase):
                 "Decision",
                 "Tracker",
                 "Last known whereabouts",
+                "Dashboard whereabouts",
                 "Last observation time",
             },
         )
-        self.assertEqual(len({e.entity_id for e in entities}), 8)
+        self.assertEqual(len({e.entity_id for e in entities}), 9)
 
     async def test_grouping_preserves_existing_entity_ids_and_entry_settings(self):
         entry = await self.create()
@@ -526,6 +527,21 @@ class HomeAssistantTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(result["type"], "form", result)
         self.assertEqual(result["errors"], {"base": "source_missing"})
+
+    async def test_dashboard_history_survives_reload_and_is_cleared_on_deletion(self):
+        from test_dashboard import exercise_dashboard_lifecycle
+
+        await exercise_dashboard_lifecycle(self)
+
+    async def test_dashboard_history_drops_removed_source(self):
+        from test_dashboard import exercise_dashboard_remap
+
+        await exercise_dashboard_remap(self)
+
+    async def test_dashboard_card_renders_current_stale_and_unknown(self):
+        from test_examples import exercise_dashboard_template
+
+        await exercise_dashboard_template(self)
 
 
 if __name__ == "__main__":

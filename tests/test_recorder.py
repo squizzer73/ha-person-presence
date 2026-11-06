@@ -57,3 +57,14 @@ async def exercise_recorder(test):
     test.assertGreater(await test.hass.async_add_executor_job(rows), before)
     await entry.runtime_data.async_refresh_at(dt_util.utcnow() + timedelta(seconds=61))
     test.assertIsNone(entry.runtime_data.whereabouts().value)
+
+    await test.hass.async_block_till_done()
+    await recorder.async_block_till_done()
+    stale_rows = await test.hass.async_add_executor_job(rows)
+    for seconds in range(65, 90, 5):
+        await entry.runtime_data.async_refresh_at(
+            dt_util.utcnow() + timedelta(seconds=seconds)
+        )
+    await test.hass.async_block_till_done()
+    await recorder.async_block_till_done()
+    test.assertEqual(await test.hass.async_add_executor_job(rows), stale_rows)

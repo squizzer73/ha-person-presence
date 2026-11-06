@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0b2 — public beta, 6 November 2026
+
+- Adds Dashboard whereabouts, which retains accepted locations with an explicit “last known” label when current evidence expires.
+- Keeps strict current Whereabouts unchanged; retained history never becomes a current automation assertion.
+- Persists the original observation timestamp privately across restarts, validates mappings on restore and removes history with the entry.
+- Avoids ticking-age history writes; dashboard templates can render relative age.
+- Adds a tested dashboard card example and iCloud3 guidance on source observation times, polling intervals and stale data.
+- Adds regressions for history validation, restore, remapped sources, deletion and recorder behaviour.
+
 ## 0.2.0b1 — public beta, 6 November 2026
 
 - Adds an additive Whereabouts sensor and independent last-known diagnostics.

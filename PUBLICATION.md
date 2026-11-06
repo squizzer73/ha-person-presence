@@ -8,17 +8,21 @@
 - Licence: MIT, approved by the owner on 6 November 2026; notice included in both the repository and install ZIP.
 - Distribution: prepare a public custom-repository beta before catalog submission.
 
-## Prepared locally
+## Distribution files
 
 Manifest documentation and issue URLs target the approved repository. Support and contribution guidance, bug/feature issue forms, an original teal person/location icon and least-privilege validation workflow are included. The release-file allowlist excludes household deployment files, live screenshots, private configuration and credentials.
 
-## Published beta
+## Release history
 
 The owner approved publishing the prerelease on 6 November 2026. [0.2.0b1](https://github.com/squizzer73/ha-person-presence/releases/tag/0.2.0b1) tags commit `80b07bd57d134b3a7de52696b793ad4dac780081`, which passed all three required validation jobs in run 42197883378. No checks were ignored.
 
 The publication workflow verified that exact successful run, rebuilt the pinned commit, checked the expected SHA256, attached the install ZIP and SHA256SUMS to a draft, then published it as a prerelease. Both public downloads, ZIP contents, tag and checksum were independently read back. Install ZIP SHA256: `c4b3ae31fcb8680332898bff496e76bdd054331d75ed292be51c4cb8c364d014`.
 
 The public repository has its description/topics and issues enabled. The exact export excludes household deployment files, live screenshots, private configuration and credentials. The README provides a custom-repository Marketplace link; inclusion in the shared catalog is not claimed.
+
+## 0.2.0b2
+
+The owner approved publishing the Dashboard whereabouts changes, README/provider guidance and release notes on 6 November 2026. The release must use an exact commit with passing tests/build, hassfest and Marketplace validation, then publish the install ZIP and SHA256SUMS as a GitHub prerelease. The one-time publisher is pinned to the verified commit and checksum; publication is read back afterward. See [what changed](docs/releases/0.2.0b2.md).
 
 ## Remaining work
 

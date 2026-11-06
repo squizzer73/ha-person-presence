@@ -1,22 +1,19 @@
-# Candidate validation — 0.2.0b1
+# Validation — 0.2.0b2
 
-This is a locally validated beta candidate. A household pilot is installed separately. The public 0.2.0b1 prerelease is published from validated commit `80b07bd57d134b3a7de52696b793ad4dac780081`. Its downloaded install ZIP and checksum were verified independently.
+## Automated checks
 
-## Automated evidence
+75 tests pass locally on stable Home Assistant Core 2026.11.0 / Python 3.14.8 in a clean task-owned environment, with Ruff lint/format and mypy covering 16 source modules. The standalone export is validated separately before publication.
 
-- 71 tests pass on stable Home Assistant Core 2026.11.0, Python 3.14.8, in a clean task-owned environment. No borrowed project dependencies or live HA connection are required.
-- Coverage includes phone/watch decisions, conflicting and stale evidence, timestamp ambiguity, capability filtering, canonical room/zone identity, additive Whereabouts, six fictional legacy entries with preserved entity IDs and user enablement choices, repairs, configuration preview, diagnostic redaction and deterministic exports.
-- A real temporary SQLite recorder verifies unchanged source heartbeats do not produce repeated semantic history writes. The optional observation-time diagnostic updates independently.
-- The shipped notification and automation examples run against real HA templates, including Unknown and Unavailable.
-- Ruff lint, formatting and mypy cover the source; the standalone repository export independently passed all 71 tests, lint, formatting and type checks.
-- An independent review identified capability, freshness, timestamp-override, settling, place-identity, diagnostic-update and packaging issues. Regression checks cover the fixes; no reported minor findings are deferred.
+The suite covers source decisions, freshness and ambiguous timestamps, canonical places, guided configuration, repairs, privacy redaction and deterministic packaging. New checks cover current versus historical dashboard output, original timestamp preservation through reload, stored-file readback, malformed/future/wrong-person/source-remapped restore rejection and entry deletion cleanup. Real SQLite recorder checks include fresh heartbeats and repeated stale-age evaluation. The documented dashboard card renders current, last-known, Unknown and Unavailable cases inside HA.
 
-The dependency inventory in requirements-test.lock records the observed macOS environment. CI installs requirements-test.txt for its own platform; the inventory is not a universal cross-platform lock.
+An independent static review of the new history implementation reported no actionable correctness/privacy defects after the documentation clarification. A separately approved household pilot loaded all entries with existing entity IDs, settings, user enablement choices, Person assignments and dashboard profiles preserved. Native device pages and the configuration preview passed read-only browser checks. Live history files were observed after accepted readings. Cross-restart history restoration was tested in isolated HA; no additional live restart was performed solely for this check. Physical accuracy and provider coverage remain field-validation tasks.
 
-## Scope and remaining gates
+## Public release evidence
 
-Native browser checks passed for the per-person device page, options preview and filtered source form in a localhost-bound fictional household; the preview and form screenshots were visually inspected. Private test credentials, session storage, logs, screenshots and household deployment scripts are excluded from the exact release-file manifest.
+The 0.2.0b1 release passed tests/build, hassfest and Marketplace validation; its published ZIP and checksum were downloaded and verified. The same three jobs must pass for the exact 0.2.0b2 release commit before the publishing workflow runs. Prepared workflows and local tests are not evidence of that external run. The publication receipt and Actions run identify the final tagged commit.
 
-Repository identity, documentation/issue URLs and codeowner are now set locally with the owner’s approval. An original icon is included for review. MIT licensing is included with owner approval. The owner approved the prepared public upload and created the repository. GitHub private vulnerability reporting was verified enabled on 6 November 2026 and is linked from SECURITY.md. Broader field acceptance remains open. GitHub Actions has now passed hassfest and the full Linux test/build job at commit `7445f51b193250dec1de9f352a63a454e7d4b583` (run 42197572188). Marketplace validation also passed after the repository metadata correction, without ignored checks. Catalog approval is separate. Physical tracking accuracy, watch-only location delays and provider coverage require separate field validation. Source providers must supply the needed observations; this integration cannot manufacture an independent Apple Watch outdoor fix.
+## Privacy and limits
 
-See PUBLICATION.md for publication requirements and docs/troubleshooting.md for source limitations. The existing household installation remains unchanged.
+Only the exact release-file manifest is exported. Private household configuration, backups, credentials, deployment scripts and live screenshots are excluded. Retained display history is stored privately inside the user's HA configuration, never substituted for current presence or included in the integration-owned diagnostic payload. GitHub private vulnerability reporting is enabled and linked in SECURITY.md.
+
+History requires a previously accepted observation: an old rejected provider location does not create a history record. Physical accuracy, wearing detection, watch-only location coverage and observed delays require separate field testing. No Marketplace catalog acceptance is claimed. The macOS dependency inventory is recorded in requirements-test.lock; CI installs requirements-test.txt for its own platform.

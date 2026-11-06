@@ -18,6 +18,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         PresenceSensor(entry, kind, label)
         for kind, label in (
             ("whereabouts", "Whereabouts"),
+            ("dashboard_whereabouts", "Dashboard whereabouts"),
             ("last_known_whereabouts", "Last known whereabouts"),
             ("last_observation_time", "Last observation time"),
             ("location", "Location"),
@@ -57,6 +58,8 @@ class PresenceSensor(CoordinatorEntity["PresenceCoordinator"], SensorEntity):
     @property
     def native_value(self):
         result = self.coordinator.data
+        if self.kind == "dashboard_whereabouts":
+            return self.coordinator.dashboard_whereabouts()["value"]
         if self.kind == "whereabouts":
             return self.coordinator.whereabouts().value
         if self.kind == "last_known_whereabouts":
@@ -81,6 +84,8 @@ class PresenceSensor(CoordinatorEntity["PresenceCoordinator"], SensorEntity):
 
     @property
     def extra_state_attributes(self):
+        if self.kind == "dashboard_whereabouts":
+            return self.coordinator.dashboard_whereabouts()["attributes"]
         if self.kind == "whereabouts":
             return self.coordinator.whereabouts().attributes
         return self.coordinator.details()

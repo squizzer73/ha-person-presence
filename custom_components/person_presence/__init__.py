@@ -12,11 +12,13 @@ from homeassistant.helpers.event import (
     async_track_state_change_event,
     async_track_time_interval,
 )
+from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN, PLATFORMS
 from .engine import Resolver, Result
+from .history import restore_record
 from .inputs import SOURCE_FIELDS, observe, validate_config
 from .places import PlaceCatalog
 from .repairs import remove_issues, sync_missing_sources
@@ -31,6 +33,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     config = validate_config({**entry.data, **entry.options})
     runtime = PresenceCoordinator(hass, entry, config)
     entry.runtime_data = runtime
+    await runtime.async_load_history()
     await runtime.async_refresh_at(dt_util.utcnow())
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     runtime.start()
@@ -39,6 +42,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     if await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         entry.runtime_data.stop()
+        await entry.runtime_data.async_save_history()
         return
     raise ConfigEntryError("Unable to unload Person Presence platforms")
 
@@ -61,14 +65,79 @@ class PresenceCoordinator(DataUpdateCoordinator[Result]):
         self.last_observation_time: float | None = None
         self.running = False
         self._stopped = False
+        self.dashboard_history: dict | None = None
+        self.history_store: Store[dict] = Store(
+            hass,
+            1,
+            f"{DOMAIN}.{entry.entry_id}.history",
+            private=True,
+            atomic_writes=True,
+        )
+        self._history_save_at = 0.0
         self.catalog = SourceCatalog.from_hass(hass)
         self.places = PlaceCatalog.from_hass(hass)
+        self.history_sources = {
+            device[field]
+            for device in config["devices"]
+            for field in ("tracker", "room")
+            if device.get(field)
+        }
         self._unsub = []
         self.sources = {
             device[field]
             for device in config["devices"]
             for field in SOURCE_FIELDS
             if device.get(field)
+        }
+
+    async def async_load_history(self):
+        try:
+            data = await self.history_store.async_load()
+        except OSError:
+            _LOGGER.warning(
+                "Unable to load dashboard history; current inference continues"
+            )
+            return
+        self.dashboard_history = restore_record(
+            data,
+            self.config["person"],
+            self.history_sources,
+            dt_util.utcnow().timestamp(),
+        )
+
+    async def async_save_history(self):
+        try:
+            await self.history_store.async_save(self.dashboard_history or {})
+        except OSError:
+            _LOGGER.warning(
+                "Unable to save dashboard history; current inference continues"
+            )
+
+    def dashboard_whereabouts(self):
+        current = self.whereabouts()
+        value = current.value
+        historical = value is None and self.dashboard_history is not None
+        record = self.dashboard_history if historical else None
+        return {
+            "value": (record["value"][:242] + " (last known)") if record else value,
+            "attributes": {
+                "freshness": "last_known"
+                if historical
+                else "current"
+                if value is not None
+                else "unknown",
+                "current_presence": current.attributes["presence"],
+                "observed_at": dt_util.utc_from_timestamp(
+                    record["observed_at"]
+                ).isoformat()
+                if record
+                else None,
+                "last_known_value": record["value"] if record else None,
+                "source_entity_id": record["source_entity_id"]
+                if record
+                else current.attributes["source_entity_id"],
+                "settling": current.attributes["settling"],
+            },
         }
 
     @callback
@@ -155,6 +224,34 @@ class PresenceCoordinator(DataUpdateCoordinator[Result]):
         if projected.value is not None and not result.pending:
             self.last_known_whereabouts = projected.value
             self.last_observation_time = result.observed_at
+        if (
+            projected.value is not None
+            and not result.pending
+            and result.observed_at is not None
+        ):
+            record = restore_record(
+                {
+                    "value": projected.value,
+                    "observed_at": result.observed_at,
+                    "person_entity_id": self.config["person"],
+                    "source_entity_id": result.source_entity_id,
+                },
+                self.config["person"],
+                self.history_sources,
+                timestamp,
+            )
+            if record is not None:
+                previous = self.dashboard_history
+                self.dashboard_history = record
+                changed_place = previous is None or any(
+                    previous[key] != record[key]
+                    for key in ("value", "source_entity_id")
+                )
+                if changed_place or timestamp - self._history_save_at >= 60:
+                    self._history_save_at = timestamp
+                    self.history_store.async_delay_save(
+                        lambda: self.dashboard_history or {}, 5
+                    )
         sync_missing_sources(self.hass, self.entry, self.config)
         stable_evidence = {
             key: {
@@ -214,3 +311,6 @@ class PresenceCoordinator(DataUpdateCoordinator[Result]):
 
 async def async_remove_entry(hass, entry):
     remove_issues(hass, entry)
+    await Store(
+        hass, 1, f"{DOMAIN}.{entry.entry_id}.history", private=True, atomic_writes=True
+    ).async_remove()
