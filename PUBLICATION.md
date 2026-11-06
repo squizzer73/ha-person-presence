@@ -14,9 +14,13 @@ Manifest documentation and issue URLs target the approved repository. Support an
 
 ## Still required
 
-1. Upload the prepared export; public upload approved by the owner on 6 November 2026.
+The approved 59-file export is uploaded to the public repository. The owner added the description and topics; issues are enabled. No household files are included.
+
+GitHub hassfest and the test/build job passed at commit `7445f51b193250dec1de9f352a63a454e7d4b583`. Marketplace validation also passed after the metadata correction. No checks were ignored.
+
+1. Retain green validation for the release commit.
 2. Verify repository metadata and enable GitHub private vulnerability reporting before advertising a private reporting URL.
-3. Configure description/topics and run hassfest and HACS validation without ignored checks. Local tests do not prove these repository-dependent checks.
+3. Record final external validation results before publishing a packaged release.
 4. Obtain approval for the concrete public repository/release contents, then publish a full GitHub prerelease with the versioned install ZIP and checksums. A tag alone is not a release.
 5. Distribute a custom-repository link and collect field feedback. Catalog submission is a separate step after the required checks pass.
 
