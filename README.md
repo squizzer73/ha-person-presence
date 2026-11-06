@@ -69,6 +69,8 @@ Bermuda room reports are estimates. Use its matching local home/away tracker as 
 
 ## Testing and upgrades
 
+Trying the beta? Start with the [testing guide and feedback checklist](docs/beta-testing.md). Phone-only results, successful tests, confusing setup steps and suggestions are all welcome.
+
 Test both devices carried, watch charging elsewhere, phone left elsewhere, watch-only departure, watch removed without charging, stale/offline sources and a restart. Compare observations with physical reality and measure delays. Passing automated tests is not physical acceptance.
 
 Upgrades preserve the integration domain, existing entries, device identifiers, entity IDs, custom names, enabled/disabled settings, mappings, priorities and explicit timing limits. Whereabouts is additive. Back up HA before installing; rollback must preserve newer user settings rather than blindly restoring old registry/config snapshots.

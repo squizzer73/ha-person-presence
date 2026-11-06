@@ -1,0 +1,37 @@
+name: Beta feedback
+description: Share testing results, setup feedback or ideas, including things that worked
+title: "[Beta feedback] "
+body:
+  - type: markdown
+    attributes:
+      value: "Thanks for trying the beta. Follow the [testing guide](https://github.com/squizzer73/ha-person-presence/blob/main/docs/beta-testing.md) and skip scenarios your setup cannot support. Use fictional people/places; omit coordinates, routes, credentials, Bluetooth keys and raw provider payloads. Review/redact any attachments."
+  - type: input
+    id: versions
+    attributes:
+      label: Person Presence and Home Assistant Core versions
+    validations:
+      required: true
+  - type: textarea
+    id: setup
+    attributes:
+      label: Devices, providers and rules
+      description: Device types, source integrations, preference order and charging/wearing rules. Is a real worn/on-body signal available?
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Scenarios and results
+      description: What you tried, expected versus actual Whereabouts/Selected device/Decision, and whether it worked, was unexpected or could not be tested. The guide includes a copyable checklist.
+    validations:
+      required: true
+  - type: textarea
+    id: timing
+    attributes:
+      label: Source observations and delays
+      description: Approximate observation ages, delay until the source updated, and delay until Whereabouts updated. Leave out exact routes and locations.
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: Setup feedback, suggestions or ideas
+      description: What was confusing, what worked well, and anything you would change.

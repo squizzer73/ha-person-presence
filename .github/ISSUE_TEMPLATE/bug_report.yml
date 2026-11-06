@@ -3,7 +3,7 @@ description: Report unexpected presence or configuration behaviour
 body:
   - type: markdown
     attributes:
-      value: "Use fictional names. Do not include coordinates, credentials, raw provider payloads or Bluetooth identity keys. Review diagnostics before sharing."
+      value: "Use fictional names. Do not include coordinates, credentials, raw provider payloads or Bluetooth identity keys. Review diagnostics before sharing. The beta testing guide is at https://github.com/squizzer73/ha-person-presence/blob/main/docs/beta-testing.md"
   - type: input
     id: versions
     attributes:
@@ -24,3 +24,8 @@ body:
       description: Include reproduction steps, Whereabouts and Decision output, source freshness and approximate delays.
     validations:
       required: true
+  - type: textarea
+    id: timing
+    attributes:
+      label: Source observations and timing
+      description: Approximate source observation ages, delay until the source updated, and delay until Whereabouts updated. Include whether a real worn/on-body signal is available. Use fictional names and omit coordinates.

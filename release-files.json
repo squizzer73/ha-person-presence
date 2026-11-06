@@ -1,4 +1,5 @@
 [
+  ".github/ISSUE_TEMPLATE/beta_feedback.yml",
   ".github/ISSUE_TEMPLATE/bug_report.yml",
   ".github/ISSUE_TEMPLATE/feature_request.yml",
   ".github/workflows/publish-beta.yml",
@@ -34,6 +35,7 @@
   "custom_components/person_presence/translations/en.json",
   "custom_components/person_presence/whereabouts.py",
   "docs/assets/icon.svg",
+  "docs/beta-testing.md",
   "docs/privacy.md",
   "docs/troubleshooting.md",
   "docs/usage.md",
