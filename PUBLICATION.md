@@ -22,7 +22,11 @@ The public repository has its description/topics and issues enabled. The exact e
 
 ## 0.2.0b2
 
-The owner approved publishing the Dashboard whereabouts changes, README/provider guidance and release notes on 6 November 2026. The release must use an exact commit with passing tests/build, hassfest and Marketplace validation, then publish the install ZIP and SHA256SUMS as a GitHub prerelease. The one-time publisher is pinned to the verified commit and checksum; publication is read back afterward. See [what changed](docs/releases/0.2.0b2.md).
+[0.2.0b2 is published](https://github.com/squizzer73/ha-person-presence/releases/tag/0.2.0b2), following the owner's approval on 6 November 2026. It tags commit `60b4e04c6e5ddaf42c56256a64937f7020126fd7`, validated by [run 42217187794](https://github.com/squizzer73/ha-person-presence/actions/runs/42217187794). All three required jobs passed; no checks were ignored.
+
+[Publication run 42217311990](https://github.com/squizzer73/ha-person-presence/actions/runs/42217311990) built the pinned commit, verified the expected install checksum, attached both assets and published the prerelease. The tag, public download bytes, checksum and release notes were independently read back. Install ZIP SHA256: `c49a555ab399c5d493d43a882fa5e9a24b538310d3f6e4d5334959dfa4956130`. See [what changed](docs/releases/0.2.0b2.md).
+
+The validated release branch `codex/release-0.2.0b2` provides the existing commit reference required by GitHub's workflow-scope rules for this historical target. No additional credentials or token scope were requested. The initial failed publication made no release; its retry succeeded after the reference was created.
 
 ## Remaining work
 
@@ -30,7 +34,7 @@ The owner approved publishing the Dashboard whereabouts changes, README/provider
 2. Keep the security policy current. GitHub private vulnerability reporting was enabled by the owner and verified on 6 November 2026; SECURITY.md links to the private report form.
 3. Decide when to issue a stable release and request catalog inclusion. Catalog submission remains a separate authorized action.
 
-The historical publishing workflow is now manual-only so routine documentation changes cannot trigger another publication. Future versions need their own reviewed target, validation evidence and checksum.
+Publication runs only on a manual dispatch or a change to the explicit versioned release-request path. Routine documentation changes cannot trigger publication. Future versions need their own approved request, reviewed target, validation evidence and checksum.
 
 Field acceptance remains incomplete, especially wearing detection and watch-only outdoor provider updates. Do not describe this beta as physically proven or catalog approved. The existing household pilot is unchanged by these local preparation edits.
 

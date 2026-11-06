@@ -10,7 +10,7 @@ An independent static review of the new history implementation reported no actio
 
 ## Public release evidence
 
-The 0.2.0b1 release passed tests/build, hassfest and Marketplace validation; its published ZIP and checksum were downloaded and verified. The same three jobs must pass for the exact 0.2.0b2 release commit before the publishing workflow runs. Prepared workflows and local tests are not evidence of that external run. The publication receipt and Actions run identify the final tagged commit.
+The 0.2.0b1 release passed tests/build, hassfest and Marketplace validation; its published ZIP and checksum were downloaded and verified. The same three jobs passed for the exact 0.2.0b2 release commit `60b4e04c6e5ddaf42c56256a64937f7020126fd7` in [run 42217187794](https://github.com/squizzer73/ha-person-presence/actions/runs/42217187794). The published b2 ZIP, checksum, tag and release-note body were independently downloaded/read back and verified after [publication run 42217311990](https://github.com/squizzer73/ha-person-presence/actions/runs/42217311990) succeeded. The publishing-administration commit also passed all three jobs in run 42217312012.
 
 ## Privacy and limits
 
