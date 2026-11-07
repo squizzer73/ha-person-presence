@@ -680,11 +680,16 @@ class HomeAssistantTests(unittest.IsolatedAsyncioTestCase):
         )
         self.assertEqual(form["step_id"], "geocoding")
         form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"geocode": True, "configure_service": True}
+        )
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"provider": "custom"}
+        )
+        form = await self.hass.config_entries.options.async_configure(
             form["flow_id"],
             {
                 "endpoint": "https://maps.example/reverse",
                 "authorized": True,
-                "geocode": True,
             },
         )
         self.assertEqual(entry.runtime_data.lookup.options, {})
@@ -705,7 +710,10 @@ class HomeAssistantTests(unittest.IsolatedAsyncioTestCase):
             form["flow_id"], {"next_step_id": "geocoding"}
         )
         form = await self.hass.config_entries.options.async_configure(
-            form["flow_id"], {"endpoint": "", "geocode": False}
+            form["flow_id"], {"geocode": False, "configure_service": True}
+        )
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"provider": "remove"}
         )
         form = await self.hass.config_entries.options.async_configure(
             form["flow_id"], {"next_step_id": "finish"}
@@ -843,7 +851,7 @@ class HomeAssistantTests(unittest.IsolatedAsyncioTestCase):
             form["flow_id"], {"geocode": True}
         )
         self.assertEqual(form["type"], "form")
-        self.assertEqual(form["errors"]["base"], "invalid_geocoder")
+        self.assertEqual(form["step_id"], "lookup_provider")
         self.assertEqual(entry.runtime_data.lookup.options, {})
 
 

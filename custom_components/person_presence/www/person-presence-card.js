@@ -43,6 +43,17 @@ export function ageLabel(value, now = Date.now()) {
 }
 const usable = (s) =>
   s && !['unknown', 'unavailable', 'none', ''].includes(s.state);
+export function attributionLinks(place) {
+  return usable(place) && place.attributes?.provider === 'geoapify'
+    ? [
+        { href: 'https://www.geoapify.com/', label: 'Powered by Geoapify' },
+        {
+          href: 'https://www.openstreetmap.org/copyright',
+          label: '© OpenStreetMap contributors',
+        },
+      ]
+    : [];
+}
 export function rowsForCard(hass, config = {}) {
   const states = hass?.states || {};
   const matches = Object.entries(states).filter(
@@ -233,6 +244,23 @@ export class PersonPresenceCard extends Base {
         ),
       );
       card.append(button);
+      if (this.config.show_place !== false && row.freshness === 'current') {
+        const links = attributionLinks(row.place);
+        if (links.length) {
+          const attribution = element('div', undefined, 'details attribution');
+          attribution.style.cssText = 'padding:0 0 12px 52px';
+          for (const [index, item] of links.entries()) {
+            if (index) attribution.append(document.createTextNode(' · '));
+            const link = element('a', item.label);
+            link.href = item.href;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.style.color = 'var(--primary-color,#03a9f4)';
+            attribution.append(link);
+          }
+          card.append(attribution);
+        }
+      }
     }
     this.shadowRoot.replaceChildren(style, card);
   }

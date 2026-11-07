@@ -1,12 +1,10 @@
 """Opt-in shared reverse lookup; no default endpoint or tracking decisions."""
 
 import asyncio
-import ipaddress
 import json
 import time
 from dataclasses import dataclass
 from math import isfinite
-from urllib.parse import urlsplit
 
 
 async def read_json(content):
@@ -22,40 +20,13 @@ async def read_json(content):
 class PlaceLabel:
     label: str
     attribution: str = ""
+    provider: str = "custom"
 
 
 def validate_options(options):
-    endpoint = str(options.get("endpoint", "")).strip()
-    if not endpoint:
-        return {}
-    parts = urlsplit(endpoint)
-    host = (parts.hostname or "").rstrip(".").lower()
-    try:
-        local = ipaddress.ip_address(host).is_private
-    except ValueError:
-        local = host == "localhost" or host.endswith(".local")
-    if (
-        not options.get("authorized")
-        or not host
-        or parts.username
-        or parts.password
-        or parts.query
-        or parts.fragment
-        or host == "nominatim.openstreetmap.org"
-        or not (
-            parts.scheme == "https"
-            or parts.scheme == "http"
-            and local
-            and options.get("local_http")
-        )
-    ):
-        raise ValueError("invalid_geocoder")
-    return {
-        "endpoint": endpoint,
-        "authorized": True,
-        "local_http": bool(options.get("local_http")),
-        "contact": str(options.get("contact", ""))[:200],
-    }
+    from .providers import validate_provider_options
+
+    return validate_provider_options(options)
 
 
 class PlaceLookup:
@@ -78,7 +49,9 @@ class PlaceLookup:
     def configure(self, options):
         options = validate_options(options)
         if options != self.options:
-            if options.get("endpoint") != self.options.get("endpoint"):
+            if options.get("endpoint") != self.options.get("endpoint") or options.get(
+                "api_key"
+            ) != self.options.get("api_key"):
                 self.retry_at = 0.0
             self.options = options
             self.clear()
@@ -131,7 +104,11 @@ class PlaceLookup:
             self.prune()
             if key in self.cache:
                 item = self.cache[key]
-                return PlaceLabel(item["label"], item.get("attribution", ""))
+                return PlaceLabel(
+                    item["label"],
+                    item.get("attribution", ""),
+                    self.options.get("provider", "custom"),
+                )
             if now < self.retry_at:
                 return None
             await asyncio.sleep(max(0, self.spacing - (now - self.last_request)))
@@ -167,7 +144,11 @@ class PlaceLookup:
                 while len(self.cache) > 1000:
                     del self.cache[next(iter(self.cache))]
                 self.on_change()
-                return PlaceLabel(item["label"], item["attribution"])
+                return PlaceLabel(
+                    item["label"],
+                    item["attribution"],
+                    self.options.get("provider", "custom"),
+                )
             except TimeoutError, OSError, ValueError:
                 self.retry_at = self.clock() + 600
                 return None

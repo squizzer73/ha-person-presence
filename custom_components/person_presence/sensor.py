@@ -108,6 +108,7 @@ class PresenceSensor(CoordinatorEntity["PresenceCoordinator"], SensorEntity):
                 "integration": "person_presence",
                 "output_kind": self.kind,
                 "attribution": label.attribution if label else None,
+                "provider": label.provider if label else None,
             }
         if self.kind in ("distance_from_home", "travel_direction"):
             travel = self.coordinator.travel.result

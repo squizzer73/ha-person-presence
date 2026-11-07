@@ -9,7 +9,7 @@ from homeassistant.components.lovelace.const import LOVELACE_DATA
 from homeassistant.components.lovelace.resources import ResourceStorageCollection
 
 CARD_PATH = "/person_presence/person-presence-card.js"
-CARD_URL = CARD_PATH + "?v=0.3.0b1"
+CARD_URL = CARD_PATH + "?v=0.4.0b1"
 _LOGGER = logging.getLogger(__name__)
 
 

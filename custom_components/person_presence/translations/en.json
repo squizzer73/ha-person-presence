@@ -55,7 +55,7 @@
           "move_later": "Move a device later",
           "settings": "Advanced timing and accuracy",
           "finish": "Review and save",
-          "geocoding": "Optional place lookup"
+          "geocoding": "Place lookup (optional)"
         }
       },
       "source_mode": {
@@ -121,14 +121,62 @@
         }
       },
       "geocoding": {
-        "title": "Optional place lookup",
-        "description": "Off by default. Enabling sends rounded outdoor coordinates to your configured external service. Supply a self-hosted or provider-authorized Nominatim-compatible reverse endpoint; no public service is bundled. Service configuration belongs to {owner}. Lookups do not change tracking decisions. Clear cached descriptions using the Clear place cache action.",
+        "title": "Place lookup (optional)",
+        "description": "Rooms, Home, zones and Away work without an account. Optional address descriptions send fresh outdoor coordinates for people you enable to the shared service. Rooms and known zones take precedence.\n\n{service}\n\nConfigure the household service once, then enable it separately for each person. Changing the shared service affects everyone already enabled. Settings apply only after final Save.",
         "data": {
-          "geocode": "Enable place lookup for this person",
+          "geocode": "Show addresses outside zones for this person",
+          "configure_service": "Set up or change address lookup for the household"
+        }
+      },
+      "lookup_provider": {
+        "title": "Address lookup service",
+        "description": "Geoapify needs only your own API key. Custom service is an advanced option. Removing the shared service stops lookup for everyone; it does not remove location history.",
+        "data": {
+          "provider": "Service"
+        }
+      },
+      "lookup_geoapify": {
+        "title": "Geoapify API key",
+        "description": "[Get an API key from Geoapify](https://myprojects.geoapify.com/). Paste it below; no service URL is needed.\n\n{saved_key}\n\nThe field is masked. The key is stored privately in Home Assistant configuration, not encrypted by this integration. It is shared only within your HA installation and sent to Geoapify for lookup. Never post it in bug reports or chat.",
+        "data": {
+          "api_key": "API key",
+          "remove_key": "Remove saved key and household service"
+        }
+      },
+      "lookup_test": {
+        "title": "Check the connection (optional)",
+        "description": "Testing sends one fixed public example coordinate, not anyone\u2019s location, and may use one Geoapify credit. Nothing is saved or enabled by this test. You can skip and save for later.",
+        "menu_options": {
+          "lookup_test_connection": "Test connection",
+          "lookup_skip": "Skip test and continue",
+          "lookup_geoapify": "Change API key"
+        }
+      },
+      "lookup_test_success": {
+        "title": "Connection successful",
+        "description": "The service returned a valid result. Continue, then use the final Save to apply your settings.",
+        "menu_options": {
+          "lookup_skip": "Continue",
+          "lookup_geoapify": "Change API key"
+        }
+      },
+      "lookup_test_error": {
+        "title": "Connection could not be checked",
+        "description": "{reason}\n\nNo settings have been saved. You can change the key, retry, or skip the test.",
+        "menu_options": {
+          "lookup_geoapify": "Change API key",
+          "lookup_test_connection": "Test again",
+          "lookup_skip": "Skip test and continue"
+        }
+      },
+      "lookup_custom": {
+        "title": "Advanced: custom service",
+        "description": "Use an authorized or self-hosted Nominatim-compatible reverse endpoint. Public OSMF Nominatim is unsupported. This is optional; Geoapify needs none of these settings. Changes apply only after final Save.",
+        "data": {
           "endpoint": "Reverse lookup endpoint URL",
           "contact": "Provider contact identifier",
-          "authorized": "I am authorized to use this endpoint for automated location lookup",
-          "local_http": "Allow HTTP for an explicitly local self-hosted endpoint"
+          "authorized": "I am authorized to use this service for automated lookup",
+          "local_http": "Allow HTTP for a local self-hosted service"
         }
       }
     },
@@ -143,7 +191,10 @@
       "last_device": "Keep at least one device; remove the integration entry to stop tracking.",
       "unsupported_source": "This source does not expose the expected capability. Choose a suitable source or use advanced manual mapping and review its meaning.",
       "invalid_geocoder": "Use an authorized HTTPS endpoint, or explicitly permit local self-hosted HTTP. The public OSMF endpoint is not supported.",
-      "geocoder_owned": "Configure the shared lookup service in its existing owner entry."
+      "geocoder_owned": "Configure the shared lookup service in its existing owner entry.",
+      "invalid_auth": "Enter a valid Geoapify API key.",
+      "lookup_changed": "Shared lookup settings changed in another window. Open Place lookup and review them again.",
+      "cannot_save": "Shared lookup settings could not be saved. Try again."
     },
     "abort": {
       "invalid_person": "Select an existing Person and enter a name.",
@@ -213,7 +264,7 @@
           "move_later": "Move a device later",
           "settings": "Advanced timing and accuracy",
           "finish": "Review and save",
-          "geocoding": "Optional place lookup"
+          "geocoding": "Place lookup (optional)"
         }
       },
       "source_mode": {
@@ -279,14 +330,62 @@
         }
       },
       "geocoding": {
-        "title": "Optional place lookup",
-        "description": "Off by default. Enabling sends rounded outdoor coordinates to your configured external service. Supply a self-hosted or provider-authorized Nominatim-compatible reverse endpoint; no public service is bundled. Service configuration belongs to {owner}. Lookups do not change tracking decisions. Clear cached descriptions using the Clear place cache action.",
+        "title": "Place lookup (optional)",
+        "description": "Rooms, Home, zones and Away work without an account. Optional address descriptions send fresh outdoor coordinates for people you enable to the shared service. Rooms and known zones take precedence.\n\n{service}\n\nConfigure the household service once, then enable it separately for each person. Changing the shared service affects everyone already enabled. Settings apply only after final Save.",
         "data": {
-          "geocode": "Enable place lookup for this person",
+          "geocode": "Show addresses outside zones for this person",
+          "configure_service": "Set up or change address lookup for the household"
+        }
+      },
+      "lookup_provider": {
+        "title": "Address lookup service",
+        "description": "Geoapify needs only your own API key. Custom service is an advanced option. Removing the shared service stops lookup for everyone; it does not remove location history.",
+        "data": {
+          "provider": "Service"
+        }
+      },
+      "lookup_geoapify": {
+        "title": "Geoapify API key",
+        "description": "[Get an API key from Geoapify](https://myprojects.geoapify.com/). Paste it below; no service URL is needed.\n\n{saved_key}\n\nThe field is masked. The key is stored privately in Home Assistant configuration, not encrypted by this integration. It is shared only within your HA installation and sent to Geoapify for lookup. Never post it in bug reports or chat.",
+        "data": {
+          "api_key": "API key",
+          "remove_key": "Remove saved key and household service"
+        }
+      },
+      "lookup_test": {
+        "title": "Check the connection (optional)",
+        "description": "Testing sends one fixed public example coordinate, not anyone\u2019s location, and may use one Geoapify credit. Nothing is saved or enabled by this test. You can skip and save for later.",
+        "menu_options": {
+          "lookup_test_connection": "Test connection",
+          "lookup_skip": "Skip test and continue",
+          "lookup_geoapify": "Change API key"
+        }
+      },
+      "lookup_test_success": {
+        "title": "Connection successful",
+        "description": "The service returned a valid result. Continue, then use the final Save to apply your settings.",
+        "menu_options": {
+          "lookup_skip": "Continue",
+          "lookup_geoapify": "Change API key"
+        }
+      },
+      "lookup_test_error": {
+        "title": "Connection could not be checked",
+        "description": "{reason}\n\nNo settings have been saved. You can change the key, retry, or skip the test.",
+        "menu_options": {
+          "lookup_geoapify": "Change API key",
+          "lookup_test_connection": "Test again",
+          "lookup_skip": "Skip test and continue"
+        }
+      },
+      "lookup_custom": {
+        "title": "Advanced: custom service",
+        "description": "Use an authorized or self-hosted Nominatim-compatible reverse endpoint. Public OSMF Nominatim is unsupported. This is optional; Geoapify needs none of these settings. Changes apply only after final Save.",
+        "data": {
           "endpoint": "Reverse lookup endpoint URL",
           "contact": "Provider contact identifier",
-          "authorized": "I am authorized to use this endpoint for automated location lookup",
-          "local_http": "Allow HTTP for an explicitly local self-hosted endpoint"
+          "authorized": "I am authorized to use this service for automated lookup",
+          "local_http": "Allow HTTP for a local self-hosted service"
         }
       }
     },
@@ -301,7 +400,10 @@
       "last_device": "Keep at least one device; remove the integration entry to stop tracking.",
       "unsupported_source": "This source does not expose the expected capability. Choose a suitable source or use advanced manual mapping and review its meaning.",
       "invalid_geocoder": "Use an authorized HTTPS endpoint, or explicitly permit local self-hosted HTTP. The public OSMF endpoint is not supported.",
-      "geocoder_owned": "Configure the shared lookup service in its existing owner entry."
+      "geocoder_owned": "Configure the shared lookup service in its existing owner entry.",
+      "invalid_auth": "Enter a valid Geoapify API key.",
+      "lookup_changed": "Shared lookup settings changed in another window. Open Place lookup and review them again.",
+      "cannot_save": "Shared lookup settings could not be saved. Try again."
     },
     "abort": {
       "invalid_person": "Select an existing Person and enter a name.",
@@ -326,6 +428,15 @@
     "clear_place_cache": {
       "name": "Clear place cache",
       "description": "Deletes cached external place descriptions for all people. Does not delete dashboard last-known history. Requires an administrator."
+    }
+  },
+  "selector": {
+    "lookup_provider": {
+      "options": {
+        "geoapify": "Geoapify (recommended)",
+        "custom": "Custom service (advanced)",
+        "remove": "Remove household lookup service"
+      }
     }
   }
 }

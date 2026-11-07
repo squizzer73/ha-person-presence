@@ -1,24 +1,19 @@
 """Shared HA lifecycle for optional authorized geocoding."""
 
-import aiohttp
 from homeassistant.core import SupportsResponse, callback
 from homeassistant.exceptions import Unauthorized
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.storage import Store
 
 from .const import DOMAIN
-from .geocoding import PlaceLookup, read_json
+from .geocoding import PlaceLookup
+from .lookup_settings import async_snapshot, effective_options
+from .providers import async_request
 
 KEY = DOMAIN + "_places"
 
 
 def sync_lookup(hass, lookup, excluding=None):
-    owners = [
-        e
-        for e in hass.config_entries.async_entries(DOMAIN)
-        if e.entry_id != excluding and {**e.data, **e.options}.get("place_lookup")
-    ]
-    options = {**owners[0].data, **owners[0].options}["place_lookup"] if owners else {}
+    options = effective_options(hass, excluding)
     previous = lookup.generation
     lookup.configure(options)
     if previous != lookup.generation:
@@ -29,6 +24,14 @@ def sync_lookup(hass, lookup, excluding=None):
 
 
 async def get_lookup(hass):
+    import asyncio
+
+    lock = hass.data.setdefault(KEY + "_init_lock", asyncio.Lock())
+    async with lock:
+        return await _get_lookup(hass)
+
+
+async def _get_lookup(hass):
     if KEY in hass.data:
         return hass.data[KEY]
     store: Store[dict] = Store(
@@ -36,30 +39,13 @@ async def get_lookup(hass):
     )
 
     async def request(url, params):
-        lookup = hass.data[KEY]
-        try:
-            async with async_get_clientsession(hass).get(
-                url,
-                params=params,
-                headers={
-                    "User-Agent": "PersonPresence/0.3 (Home Assistant; "
-                    + lookup.options.get("contact", "")
-                    + ")"
-                },
-                allow_redirects=False,
-            ) as response:
-                response.raise_for_status()
-                return await read_json(response.content)
-        except aiohttp.ClientError as err:
-            raise OSError("Place provider unavailable") from err
+        return await async_request(hass, dict(hass.data[KEY].options), params)
 
     lookup = PlaceLookup(request)
     lookup.users = set()
     hass.data[KEY] = lookup
-    entries = hass.config_entries.async_entries(DOMAIN)
-    owners = [e for e in entries if {**e.data, **e.options}.get("place_lookup")]
-    if owners:
-        lookup.configure({**owners[0].data, **owners[0].options}["place_lookup"])
+    settings = await async_snapshot(hass)
+    lookup.configure(settings["options"])
     try:
         saved = await store.async_load()
     except OSError, ValueError:

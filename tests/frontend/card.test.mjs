@@ -91,3 +91,26 @@ test('avatars stay on the HA origin after URL normalization', async () => {
     null,
   );
 });
+
+test('Geoapify attribution uses only fixed safe links', async () => {
+  const { attributionLinks } =
+    await import('../../custom_components/person_presence/www/person-presence-card.js');
+  const links = attributionLinks({
+    state: 'Square',
+    attributes: { provider: 'geoapify', url: 'javascript:alert(1)' },
+  });
+  assert.deepEqual(
+    links.map((x) => x.href),
+    ['https://www.geoapify.com/', 'https://www.openstreetmap.org/copyright'],
+  );
+  assert.equal(
+    attributionLinks({ state: 'unknown', attributes: { provider: 'geoapify' } })
+      .length,
+    0,
+  );
+  assert.equal(
+    attributionLinks({ state: 'Square', attributes: { provider: 'custom' } })
+      .length,
+    0,
+  );
+});

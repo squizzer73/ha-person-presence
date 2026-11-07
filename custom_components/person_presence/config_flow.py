@@ -13,7 +13,6 @@ from homeassistant.helpers import selector
 from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
-from .geocoding import validate_options
 from .inputs import (
     DEFAULTS,
     SOURCE_FIELDS,
@@ -23,6 +22,7 @@ from .inputs import (
     is_worn_source,
     validate_config,
 )
+from .lookup_flow import LookupFlow
 from .places import PlaceCatalog
 from .preview import build_preview
 from .sources import SourceCatalog
@@ -86,7 +86,7 @@ def device_schema(config, priority):
     return vol.Schema(fields)
 
 
-class DeviceFlow:
+class DeviceFlow(LookupFlow):
     """Shared add/edit/remove steps for initial setup and options."""
 
     hass: HomeAssistant
@@ -418,59 +418,6 @@ class DeviceFlow:
             step_id="remove", data_schema=self._device_choice(), errors=error
         )
 
-    async def async_step_geocoding(self, user_input=None):
-        owners = [
-            e
-            for e in self.hass.config_entries.async_entries(DOMAIN)
-            if {**e.data, **e.options}.get("place_lookup")
-            and {**e.data, **e.options}.get("person") != self._config["person"]
-        ]
-        current = self._config.get("place_lookup", {})
-        errors = {}
-        if user_input is not None:
-            try:
-                options = validate_options(user_input)
-                if user_input.get("geocode") and not (options or owners):
-                    raise ValueError("invalid_geocoder")
-                if owners and options:
-                    raise ValueError("geocoder_owned")
-                self._config["geocode"] = bool(user_input.get("geocode", False))
-                if not owners:
-                    self._config["place_lookup"] = options
-                return await self.async_step_menu()
-            except ValueError as err:
-                errors["base"] = str(err)
-        fields: dict[Any, Any] = {
-            vol.Optional("geocode", default=self._config.get("geocode", False)): bool
-        }
-        if not owners:
-            fields.update(
-                {
-                    vol.Optional(
-                        "endpoint",
-                        description={"suggested_value": current.get("endpoint", "")},
-                    ): str,
-                    vol.Optional(
-                        "contact",
-                        description={"suggested_value": current.get("contact", "")},
-                    ): str,
-                    vol.Optional(
-                        "authorized", default=current.get("authorized", False)
-                    ): bool,
-                    vol.Optional(
-                        "local_http", default=current.get("local_http", False)
-                    ): bool,
-                }
-            )
-        return self.async_show_form(
-            step_id="geocoding",
-            data_schema=vol.Schema(fields),
-            errors=errors,
-            description_placeholders={
-                "owner": owners[0].title if owners else "this entry"
-            },
-        )
-
     async def async_step_settings(self, user_input=None):
         error = {}
         if user_input is not None:
@@ -515,8 +462,17 @@ class DeviceFlow:
     async def async_step_save(self, user_input=None):
         try:
             self._validate_sources(self._config)
+            await self._commit_lookup()
         except ValueError as err:
-            return self.async_abort(reason=str(err))
+            return self.async_show_menu(
+                step_id="menu",
+                menu_options=["geocoding", "finish"],
+                description_placeholders={
+                    "devices": "Settings could not be saved: "
+                    + str(err)
+                    + ". Open Place lookup to review."
+                },
+            )
         return self.async_create_entry(title=self._config["name"], data=self._config)
 
     async def _move(self, direction, user_input):

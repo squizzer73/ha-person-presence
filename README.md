@@ -30,7 +30,7 @@ You can [report a bug or suggest an idea here](https://github.com/squizzer73/ha-
 
 ## Before you start
 
-Version **0.3.0b2** is a public beta. [Download the prerelease](https://github.com/squizzer73/ha-person-presence/releases/tag/0.3.0b2), or use the Marketplace button above to add it as a custom repository. It isn't in the shared catalog yet.
+Version **0.4.0b1** is a public beta. [Download the prerelease](https://github.com/squizzer73/ha-person-presence/releases/tag/0.4.0b1), or use the Marketplace button above to add it as a custom repository. It isn't in the shared catalog yet.
 
 You'll need **Home Assistant Core 2026.11 or later**. Testing currently targets 2026.11.0; later releases need compatibility checks. Existing integrations such as the Companion app, iCloud3 and Bermuda supply the observations. Person Presence doesn't add a cloud tracking account or send commands to your devices. Optional place lookup requires a separately configured service and explicit enablement.
 
@@ -42,7 +42,7 @@ The card clearly separates current, last-known and unknown locations. It can sho
 
 Distance and direction use fresh accepted GPS from the selected device. Room updates cannot renew an old GPS fix. A device switch resets movement direction, and old locations remain dashboard history rather than current travel information.
 
-Place lookup is optional and **off by default**. It requires your own authorized or self-hosted Nominatim-compatible service; no public endpoint is bundled. Enabling it sends rounded outdoor coordinates to that service. Existing zones and room names still take precedence, and external labels never change tracking decisions.
+Place lookup is optional and **off by default**. Choose the guided Geoapify setup with your own API key, or an advanced authorized or self-hosted Nominatim-compatible service. Enabling it sends rounded outdoor coordinates to that service. Existing zones and room names still take precedence, and external labels never change tracking decisions.
 
 ## Setup
 
@@ -132,3 +132,17 @@ See [support](SUPPORT.md), [contributing](CONTRIBUTING.md) and [security reporti
 ## Licence
 
 [MIT](LICENSE). Copyright © 2026 squizzer73.
+
+## Easy optional place lookup
+
+Core tracking works without an account or key. Lookup stays off until enabled.
+
+1. Configure a person under **Settings → Devices & services → Person Presence** and choose **Place lookup**.
+2. Select **Configure shared service → Geoapify** and enter your own key from [Geoapify](https://myprojects.geoapify.com/).
+3. Choose **Test connection** or **Skip**, then finish and **Save**. The service is shared; enable lookup separately for each person.
+
+Nothing changes until Save. Testing sends a fixed public example coordinate in Berlin and may use one credit. Enabled lookup sends fresh accepted outdoor coordinates rounded to four decimal places. Zones and rooms retain priority; labels never change tracking decisions.
+
+Enter keys only in the masked Home Assistant form. Blank keeps the saved key; explicit removal clears the household service. Private Home Assistant configuration storage is not encrypted, so protect backups. If another editor changes the service, reopen Place lookup to review it before saving.
+
+The family card includes Geoapify/OpenStreetMap attribution. Your account's [pricing and limits](https://www.geoapify.com/pricing/) apply. Advanced authorized or self-hosted Nominatim-compatible services remain supported. Existing custom settings continue until an explicit shared-service change.

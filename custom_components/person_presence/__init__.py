@@ -350,8 +350,13 @@ class PresenceCoordinator(DataUpdateCoordinator[Result]):
 
 
 async def async_remove_entry(hass, entry):
+    from .lookup_settings import async_remove_settings
     from .place_service import KEY
 
+    if not any(
+        e.entry_id != entry.entry_id for e in hass.config_entries.async_entries(DOMAIN)
+    ):
+        await async_remove_settings(hass)
     if KEY in hass.data:
         sync_lookup(hass, hass.data[KEY], excluding=entry.entry_id)
     remove_issues(hass, entry)
