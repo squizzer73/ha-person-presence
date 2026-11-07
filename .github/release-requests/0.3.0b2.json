@@ -1,0 +1,7 @@
+{
+  "version": "0.3.0b2",
+  "source_sha": "4cbf35662ffc7e9759267de2a5d8788b5a2d77ef",
+  "validation_run": 42352040290,
+  "zip_sha256": "f717f03e8eb19b6c0a4a4332b8d000d7fd7896d3d7f289ffe1280a76678bb1df",
+  "approved": "Owner requested four bug fixes; prior authorization covers publication, install and restart as needed"
+}
