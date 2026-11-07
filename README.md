@@ -30,7 +30,7 @@ You can [report a bug or suggest an idea here](https://github.com/squizzer73/ha-
 
 ## Before you start
 
-Version **0.3.0b1** is a public beta. [Download the prerelease](https://github.com/squizzer73/ha-person-presence/releases/tag/0.3.0b1), or use the Marketplace button above to add it as a custom repository. It isn't in the shared catalog yet.
+Version **0.3.0b2** is a public beta. [Download the prerelease](https://github.com/squizzer73/ha-person-presence/releases/tag/0.3.0b2), or use the Marketplace button above to add it as a custom repository. It isn't in the shared catalog yet.
 
 You'll need **Home Assistant Core 2026.11 or later**. Testing currently targets 2026.11.0; later releases need compatibility checks. Existing integrations such as the Companion app, iCloud3 and Bermuda supply the observations. Person Presence doesn't add a cloud tracking account or send commands to your devices. Optional place lookup requires a separately configured service and explicit enablement.
 

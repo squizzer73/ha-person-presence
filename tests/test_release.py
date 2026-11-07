@@ -44,7 +44,7 @@ class Release(unittest.TestCase):
                 manifest = json.loads(
                     archive.read("custom_components/person_presence/manifest.json")
                 )
-                self.assertEqual(manifest["version"], "0.3.0b1")
+                self.assertEqual(manifest["version"], "0.3.0b2")
                 self.assertEqual(
                     list(manifest),
                     [

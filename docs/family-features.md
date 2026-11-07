@@ -42,7 +42,7 @@ Provide an authorized Nominatim-compatible `/reverse` endpoint. HTTPS is require
 
 Only fresh accepted GPS outside known zones is submitted, rounded to four decimal places. Requests are serialized across people, at least two seconds apart, with a 12-second lookup timeout and ten-minute backoff after transport/provider errors. The service's own terms still apply. Reverse geocoding describes an approximate address/place; it cannot prove someone entered a building.
 
-Place description is a separate optional output. Errors preserve normal Away tracking. Attribution returned by the provider is shown alongside the label in the card. Replies for an obsolete source, disabled lookup or expired location are ignored.
+Place description is a separate optional output. Errors preserve normal Away tracking. Failed lookups retry only while the same selected fix is still fresh, with at least a one-minute retry delay and any provider error backoff. Switching the endpoint resets provider-specific backoff; clearing the cache does not bypass it. Attribution returned by the provider is shown alongside the label in the card. Replies for an obsolete source, disabled lookup or expired location are ignored.
 
 The private cache retains rounded coordinates/labels for at most 30 days and 1000 records, shared installation-wide. This remains sensitive location information even though it is not a journey archive. `person_presence.clear_place_cache` requires an administrator (or a trusted automation) and deletes it without deleting dashboard last-known history. Changing service configuration also invalidates cached descriptions. Disabling lookup for one person does not erase the shared cache or another person's settings.
 

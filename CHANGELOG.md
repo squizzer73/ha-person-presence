@@ -1,3 +1,10 @@
+# 0.3.0b2 — 7 November 2026
+
+- Keep valid room presence during settling when a GPS away fix is older than the room evidence.
+- Select a fresh automatic Bermuda guard; newer or equal-time negative evidence still blocks room presence. Explicit guards are unchanged.
+- Retry failed optional place lookups while their selected GPS fix remains fresh, respecting provider backoff and a minimum retry delay.
+- Reset provider-specific error backoff when the endpoint changes, preserving shared request spacing and cache-clear rate protection.
+
 # 0.3.0b1 — 7 November 2026
 
 - Add a bundled family overview card with explicit current/last-known/unknown states, selected-device detail and a visual editor.

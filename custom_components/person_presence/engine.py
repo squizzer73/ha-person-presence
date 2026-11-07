@@ -196,8 +196,15 @@ class Resolver:
             )
         )
         if selected is not None and current.location == "home":
-            positive_away = selected.location not in (None, "home") and fresh(
-                selected.location_at, now, self.gps_age
+            home_times = [current.observed_at]
+            if selected.room and fresh(selected.room_at, now, self.room_age):
+                home_times.append(selected.room_at)
+            latest_home = max((at for at in home_times if at is not None), default=0)
+            positive_away = (
+                selected.location not in (None, "home")
+                and fresh(selected.location_at, now, self.gps_age)
+                and selected.location_at is not None
+                and selected.location_at >= latest_home
             )
             if positive_away or "local_guard_away" in selected.reason_codes:
                 valid_current = False

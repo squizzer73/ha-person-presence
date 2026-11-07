@@ -78,6 +78,8 @@ class PlaceLookup:
     def configure(self, options):
         options = validate_options(options)
         if options != self.options:
+            if options.get("endpoint") != self.options.get("endpoint"):
+                self.retry_at = 0.0
             self.options = options
             self.clear()
 

@@ -68,6 +68,7 @@ class PresenceCoordinator(DataUpdateCoordinator[Result]):
         self.place_key = None
         self.place_label = None
         self.place_task = None
+        self.place_retry_at = 0.0
         self._timing_listeners: set[Callable[[], None]] = set()
         self.resolver = Resolver(
             settle=config["settle"],
@@ -200,6 +201,7 @@ class PresenceCoordinator(DataUpdateCoordinator[Result]):
     def invalidate_place(self):
         self.place_key = None
         self.place_label = None
+        self.place_retry_at = 0.0
         if self.place_task and not self.place_task.done():
             self.place_task.cancel()
         self.place_task = None

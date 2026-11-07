@@ -380,14 +380,20 @@ def observe(
             and catalog.snapshots[candidate.entity_id].device_id
             == area_snapshot.device_id
         ]
-        local = next(
-            (
-                get_state(g.entity_id)
-                for g in guards
-                if available(get_state(g.entity_id))
-                and get_state(g.entity_id).state == "home"
+        fresh_guards = [
+            candidate
+            for g in guards
+            if available(candidate := get_state(g.entity_id))
+            and candidate.state in ("home", "not_home")
+            and fresh(observed_at(candidate, timezone), now, signal_age)
+        ]
+        local = max(
+            fresh_guards,
+            key=lambda candidate: (
+                observed_at(candidate, timezone),
+                candidate.state != "home",
             ),
-            None,
+            default=None,
         )
     if (
         available(area)

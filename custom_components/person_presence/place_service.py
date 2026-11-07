@@ -120,7 +120,8 @@ async def get_lookup(hass):
 def fix_key(runtime, now):
     result = runtime.data
     if (
-        not runtime.config.get("geocode", False)
+        runtime._stopped
+        or not runtime.config.get("geocode", False)
         or result.pending
         or result.context != "away"
         or runtime.travel.result.distance_m is None
@@ -142,7 +143,14 @@ def update_place(runtime, result, now):
     runtime.data = result
     key = fix_key(runtime, now)
     if key == runtime.place_key:
-        return
+        if (
+            key is None
+            or runtime.place_label is not None
+            or runtime.place_task is not None
+            and not runtime.place_task.done()
+            or now < max(runtime.place_retry_at, runtime.lookup.retry_at)
+        ):
+            return
     runtime.invalidate_place()
     runtime.place_key = key
     if key is None or not runtime.lookup.options:
@@ -160,6 +168,11 @@ def update_place(runtime, result, now):
             and fix_key(runtime, dt_util.utcnow().timestamp()) == key
         ):
             runtime.place_label = label
+            runtime.place_retry_at = (
+                max(runtime.lookup.retry_at, runtime.lookup.clock() + 60)
+                if label is None
+                else 0.0
+            )
             runtime.async_update_listeners()
 
     runtime.place_task = runtime.hass.async_create_task(resolve())

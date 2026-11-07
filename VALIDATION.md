@@ -1,3 +1,9 @@
+# Validation — 0.3.0b2 patch candidate
+
+115 Python tests and three Node card tests pass locally, with Ruff lint/format and mypy20 modules. Eleven focused regressions cover older away/newer room settling, a GPS fix between accepted/latest rooms, stale-first automatic guards, negative guard precedence, explicit guard preservation, endpoint-specific backoff and same-fix lookup recovery/disable/expiry. The initial regression run reproduced the four bugs before the fixes. An independent review found no material regressions in the scoped fixes. Its three coverage suggestions were added: one-minute retry floor after empty responses, duplicate in-flight request suppression and stopped-runtime suppression. External validation and live rollout evidence are recorded when completed; none is implied by local checks.
+
+The family card code is unchanged. Existing source mappings, entities and freshness limits remain unchanged by these fixes. Optional lookup stays off unless explicitly enabled.
+
 # Validation — 0.3.0b1
 
 104 Python tests pass in isolated HA/pure harnesses, with three Node card-model tests. Ruff lint/format and mypy (20 modules) pass. Synthetic Chromium browser checks cover a fictional seven-person household at 390px and 900px, current/last-known/unknown displays, more-info, editor changes and text escaping; both screenshots were visually inspected. This is not a live HA frontend or physical presence acceptance check.
