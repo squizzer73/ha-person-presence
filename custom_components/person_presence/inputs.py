@@ -30,6 +30,14 @@ INVALID = {"unknown", "unavailable", "none", "", "not_home", "away"}
 def validate_config(config):
     """Validate both UI submissions and stored entries, including source domains."""
     result = {**DEFAULTS, **config}
+    if "geocode" in config and not isinstance(config["geocode"], bool):
+        raise ValueError("invalid_geocoder")
+    if "place_lookup" in config:
+        from .geocoding import validate_options
+
+        if not isinstance(config["place_lookup"], dict):
+            raise ValueError("invalid_geocoder")
+        result["place_lookup"] = validate_options(config["place_lookup"])
     if not str(result.get("name", "")).strip() or not re.fullmatch(
         r"person\.[a-z0-9_]+", result.get("person", "")
     ):
@@ -63,6 +71,13 @@ def validate_config(config):
             or not 0 <= priority <= 999
             or priority in priorities
             or not (device.get("tracker") or device.get("room"))
+        ):
+            raise ValueError("invalid_device")
+        charging_age = device.get("charging_age")
+        if charging_age is not None and (
+            isinstance(charging_age, bool)
+            or not isinstance(charging_age, (int, float))
+            or not 1 <= charging_age <= 86400
         ):
             raise ValueError("invalid_device")
         keys.add(key)
@@ -191,6 +206,16 @@ def is_worn_source(entity_id, state, *, manual=False):
     )
 
 
+def charging_age_limit(config, signal_age, catalog=None):
+    """Charging has its own bounded age; wearing/location windows stay independent."""
+    if config.get("charging_age") is not None:
+        return config["charging_age"]
+    snapshot = catalog.snapshots.get(config.get("charging")) if catalog else None
+    if snapshot and snapshot.platform == "icloud3":
+        return max(signal_age, 1800 if config.get("wearable") else 9000)
+    return signal_age
+
+
 def observe(
     config,
     get_state,
@@ -217,8 +242,27 @@ def observe(
             else ""
         )
         charge_fresh = available(charge) and fresh(
-            observed_at(charge, timezone), now, signal_age
+            observed_at(charge, timezone),
+            now,
+            charging_age_limit(config, signal_age, catalog),
         )
+        if (
+            charge_fresh
+            and value
+            in (
+                "charging",
+                "charged",
+                "full",
+                "on",
+                "true",
+                "notcharging",
+                "discharging",
+                "off",
+                "false",
+            )
+            and not fresh(observed_at(charge, timezone), now, signal_age)
+        ):
+            codes.append("charging_status_grace")
         if charge_fresh and value in ("charging", "charged", "full", "on", "true"):
             if charge_required:
                 excluded = "charging"

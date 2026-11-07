@@ -105,7 +105,15 @@ class HomeAssistantTests(unittest.IsolatedAsyncioTestCase):
             {
                 k: payload.get(k, False)
                 for k in ("priority", "wearable", "exclude_charging")
-            },
+            }
+            | (
+                {
+                    "charging_age": payload["charging_age"],
+                    "use_custom_charging_age": True,
+                }
+                if "charging_age" in payload
+                else {}
+            ),
         )
 
     async def create(self, person="person.alex"):
@@ -149,7 +157,7 @@ class HomeAssistantTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(runtime.data.room, "Library")
         registry = er.async_get(self.hass)
         entities = er.async_entries_for_config_entry(registry, entry.entry_id)
-        self.assertEqual(len(entities), 9)
+        self.assertEqual(len(entities), 12)
         tracker = next(e for e in entities if e.domain == "device_tracker")
         self.assertIsNotNone(tracker.disabled_by)
         self.assertIsNone(self.hass.states.get(tracker.entity_id))
@@ -177,6 +185,9 @@ class HomeAssistantTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(
             {e.original_name for e in entities},
             {
+                "Distance from home",
+                "Travel direction",
+                "Place description",
                 "Whereabouts",
                 "Location",
                 "Room",
@@ -188,7 +199,7 @@ class HomeAssistantTests(unittest.IsolatedAsyncioTestCase):
                 "Last observation time",
             },
         )
-        self.assertEqual(len({e.entity_id for e in entities}), 9)
+        self.assertEqual(len({e.entity_id for e in entities}), 12)
 
     async def test_grouping_preserves_existing_entity_ids_and_entry_settings(self):
         entry = await self.create()
@@ -542,6 +553,298 @@ class HomeAssistantTests(unittest.IsolatedAsyncioTestCase):
         from test_examples import exercise_dashboard_template
 
         await exercise_dashboard_template(self)
+
+    async def test_charging_window_round_trips_through_options(self):
+        entry = await self.create()
+        original_signal_age = entry.data["signal_age"]
+        form = await self.hass.config_entries.options.async_init(entry.entry_id)
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"next_step_id": "edit"}
+        )
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"device": entry.data["devices"][0]["key"]}
+        )
+        form = await self.configure_device(
+            self.hass.config_entries.options,
+            form,
+            {
+                "name": "Band",
+                "priority": 1,
+                "wearable": True,
+                "room": "sensor.band_area",
+                "charging": "sensor.band_charge",
+                "worn": "binary_sensor.band_worn",
+                "charging_age": 1800,
+            },
+        )
+        self.assertEqual(form["type"], "menu", form)
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"next_step_id": "finish"}
+        )
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"next_step_id": "save"}
+        )
+        await self.hass.async_block_till_done()
+        self.assertEqual(entry.runtime_data.config["devices"][0]["charging_age"], 1800)
+        self.assertEqual(entry.runtime_data.config["signal_age"], original_signal_age)
+        self.assertNotIn(
+            "use_custom_charging_age", entry.runtime_data.config["devices"][0]
+        )
+        form = await self.hass.config_entries.options.async_init(entry.entry_id)
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"next_step_id": "edit"}
+        )
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"device": entry.data["devices"][0]["key"]}
+        )
+        # Submit through the real rules form with defaults, explicitly selecting automatic.
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"name": "Band", "device_type": "watch"}
+        )
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"next_step_id": "manual_sources"}
+        )
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"],
+            {
+                "room": "sensor.band_area",
+                "charging": "sensor.band_charge",
+                "worn": "binary_sensor.band_worn",
+                "manual_sources": True,
+            },
+        )
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"],
+            {
+                "priority": 1,
+                "wearable": True,
+                "exclude_charging": False,
+                "use_custom_charging_age": False,
+            },
+        )
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"next_step_id": "finish"}
+        )
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"next_step_id": "save"}
+        )
+        await self.hass.async_block_till_done()
+        self.assertNotIn("charging_age", entry.runtime_data.config["devices"][0])
+
+    async def test_family_travel_and_lookup_are_additive_and_expire(self):
+        entry = await self.create()
+        runtime = entry.runtime_data
+        now = dt_util.utcnow()
+        self.hass.states.async_set(
+            "zone.home", "0", {"latitude": 0, "longitude": 0, "radius": 100}
+        )
+        self.hass.states.async_set(
+            "device_tracker.river_phone",
+            "not_home",
+            {
+                "latitude": 0,
+                "longitude": 0.01,
+                "gps_accuracy": 10,
+                "source_type": "gps",
+            },
+        )
+        runtime.config["devices"] = [
+            {
+                "key": "phone",
+                "name": "River phone",
+                "priority": 1,
+                "tracker": "device_tracker.river_phone",
+            }
+        ]
+        runtime.config["settle"] = 0
+        runtime.resolver.settle = 0
+        await runtime.async_refresh_at(dt_util.utcnow())
+        self.assertAlmostEqual(runtime.travel.result.distance_m, 1112, delta=2)
+        self.assertEqual(runtime.travel.result.direction, "unknown")
+        self.assertIsNone(runtime.place_label)
+        self.assertEqual(runtime.lookup.options, {})
+        self.assertEqual(
+            runtime.dashboard_whereabouts()["attributes"]["person_entity_id"],
+            "person.alex",
+        )
+        await runtime.async_refresh_at(now + timedelta(seconds=400))
+        self.assertIsNone(runtime.travel.result.distance_m)
+        self.assertIsNone(runtime.place_label)
+        self.assertIsNone(runtime.data.location)
+
+    async def test_lookup_options_preview_does_not_enable_service_until_save(self):
+        entry = await self.create()
+        form = await self.hass.config_entries.options.async_init(entry.entry_id)
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"next_step_id": "geocoding"}
+        )
+        self.assertEqual(form["step_id"], "geocoding")
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"],
+            {
+                "endpoint": "https://maps.example/reverse",
+                "authorized": True,
+                "geocode": True,
+            },
+        )
+        self.assertEqual(entry.runtime_data.lookup.options, {})
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"next_step_id": "finish"}
+        )
+        await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"next_step_id": "save"}
+        )
+        await self.hass.async_block_till_done()
+        self.assertEqual(
+            entry.runtime_data.lookup.options["endpoint"],
+            "https://maps.example/reverse",
+        )
+        self.assertTrue(entry.runtime_data.config["geocode"])
+        form = await self.hass.config_entries.options.async_init(entry.entry_id)
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"next_step_id": "geocoding"}
+        )
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"endpoint": "", "geocode": False}
+        )
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"next_step_id": "finish"}
+        )
+        await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"next_step_id": "save"}
+        )
+        await self.hass.async_block_till_done()
+        self.assertEqual(entry.runtime_data.lookup.options, {})
+
+    async def test_cache_clear_requires_admin_and_preserves_history(self):
+        from types import SimpleNamespace
+        from unittest.mock import AsyncMock, patch
+
+        from homeassistant.core import Context
+        from homeassistant.exceptions import Unauthorized
+
+        entry = await self.create()
+        before = entry.runtime_data.dashboard_history.copy()
+        from custom_components.person_presence.geocoding import PlaceLabel
+
+        entry.runtime_data.place_label = PlaceLabel(
+            "Cached square", "Example attribution"
+        )
+        entry.runtime_data.async_update_listeners()
+        await self.hass.async_block_till_done()
+        place_entity = next(
+            e.entity_id
+            for e in er.async_entries_for_config_entry(
+                er.async_get(self.hass), entry.entry_id
+            )
+            if e.unique_id.endswith("_place_description")
+        )
+        self.assertEqual(self.hass.states.get(place_entity).state, "Cached square")
+        with patch.object(
+            self.hass,
+            "auth",
+            SimpleNamespace(
+                async_get_user=AsyncMock(return_value=SimpleNamespace(is_admin=False))
+            ),
+            create=True,
+        ):
+            with self.assertRaises(Unauthorized):
+                await self.hass.services.async_call(
+                    "person_presence",
+                    "clear_place_cache",
+                    blocking=True,
+                    context=Context(user_id="nonadmin"),
+                )
+        await self.hass.services.async_call(
+            "person_presence", "clear_place_cache", blocking=True
+        )
+        self.assertEqual(entry.runtime_data.dashboard_history, before)
+        self.assertEqual(self.hass.states.get(place_entity).state, "unknown")
+
+    async def test_expired_place_cache_is_removed_from_storage_without_new_requests(
+        self,
+    ):
+        import asyncio
+
+        from homeassistant.helpers.storage import Store
+
+        entry = await self.create()
+        lookup = entry.runtime_data.lookup
+        lookup.configure(
+            {"endpoint": "https://maps.example/reverse", "authorized": True}
+        )
+
+        async def request(url, params):
+            return {"display_name": "Square"}
+
+        lookup.request = request
+        await lookup.resolve(1, 2)
+        await asyncio.sleep(0.05)
+        await self.hass.async_block_till_done()
+        stored = Store(
+            self.hass,
+            1,
+            "person_presence.place_cache",
+            private=True,
+            atomic_writes=True,
+        )
+        self.assertEqual(len(await stored.async_load()), 1)
+        now = lookup.clock()
+        lookup.clock = lambda: now + 31 * 86400
+        lookup.prune()
+        await asyncio.sleep(0.05)
+        await self.hass.async_block_till_done()
+        self.assertEqual(await stored.async_load(), {})
+        self.assertIsNone(lookup.expiry_handle)
+
+    async def test_startup_rewrites_expired_place_cache_without_requests(self):
+        from homeassistant.helpers.storage import Store
+
+        from custom_components.person_presence.place_service import KEY, get_lookup
+
+        entry = await self.create()
+        await self.hass.config_entries.async_unload(entry.entry_id)
+        self.hass.config_entries.async_update_entry(
+            entry,
+            options={
+                "place_lookup": {
+                    "endpoint": "https://maps.example/reverse",
+                    "authorized": True,
+                }
+            },
+        )
+        saved = {
+            "https://maps.example/reverse|1.0000,2.0000": {
+                "label": "Old square",
+                "attribution": "Example",
+                "at": dt_util.utcnow().timestamp() - 31 * 86400,
+            }
+        }
+        store = Store(
+            self.hass,
+            1,
+            "person_presence.place_cache",
+            private=True,
+            atomic_writes=True,
+        )
+        await store.async_save(saved)
+        del self.hass.data[KEY]
+        lookup = await get_lookup(self.hass)
+        self.assertEqual(lookup.cache, {})
+        self.assertEqual(await store.async_load(), {})
+
+    async def test_lookup_cannot_enable_without_a_configured_service(self):
+        entry = await self.create()
+        form = await self.hass.config_entries.options.async_init(entry.entry_id)
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"next_step_id": "geocoding"}
+        )
+        form = await self.hass.config_entries.options.async_configure(
+            form["flow_id"], {"geocode": True}
+        )
+        self.assertEqual(form["type"], "form")
+        self.assertEqual(form["errors"]["base"], "invalid_geocoder")
+        self.assertEqual(entry.runtime_data.lookup.options, {})
 
 
 if __name__ == "__main__":

@@ -18,11 +18,15 @@ from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN, PLATFORMS
 from .engine import Resolver, Result
+from .frontend import setup_frontend
+from .geocoding import PlaceLookup
 from .history import restore_record
 from .inputs import SOURCE_FIELDS, observe, validate_config
+from .place_service import get_lookup, sync_lookup, update_place
 from .places import PlaceCatalog
 from .repairs import remove_issues, sync_missing_sources
 from .sources import SourceCatalog
+from .travel import TravelContext
 from .whereabouts import project_whereabouts
 
 _LOGGER = logging.getLogger(__name__)
@@ -33,6 +37,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     config = validate_config({**entry.data, **entry.options})
     runtime = PresenceCoordinator(hass, entry, config)
     entry.runtime_data = runtime
+    runtime.lookup = await get_lookup(hass)
+    runtime.lookup.users.add(entry.entry_id)
+    sync_lookup(hass, runtime.lookup)
+    await setup_frontend(hass)
     await runtime.async_load_history()
     await runtime.async_refresh_at(dt_util.utcnow())
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -48,13 +56,18 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 
 class PresenceCoordinator(DataUpdateCoordinator[Result]):
+    lookup: PlaceLookup
     """Read existing states only; expire evidence even when sources stop reporting."""
 
     def __init__(self, hass, entry, config):
         super().__init__(hass, _LOGGER, name=DOMAIN, config_entry=entry)
         self.config = config
         self.entry = entry
-        self._published_signature: Result | None = None
+        self._published_signature = None
+        self.travel = TravelContext()
+        self.place_key = None
+        self.place_label = None
+        self.place_task = None
         self._timing_listeners: set[Callable[[], None]] = set()
         self.resolver = Resolver(
             settle=config["settle"],
@@ -121,6 +134,10 @@ class PresenceCoordinator(DataUpdateCoordinator[Result]):
         return {
             "value": (record["value"][:242] + " (last known)") if record else value,
             "attributes": {
+                "person_entity_id": self.config["person"],
+                "integration": DOMAIN,
+                "output_kind": "dashboard_whereabouts",
+                "selected_device_name": current.attributes["selected_device_name"],
                 "freshness": "last_known"
                 if historical
                 else "current"
@@ -180,10 +197,19 @@ class PresenceCoordinator(DataUpdateCoordinator[Result]):
             self.places = PlaceCatalog.from_hass(self.hass)
             self._evaluate(dt_util.utcnow())
 
+    def invalidate_place(self):
+        self.place_key = None
+        self.place_label = None
+        if self.place_task and not self.place_task.done():
+            self.place_task.cancel()
+        self.place_task = None
+
     @callback
     def stop(self):
         self.running = False
         self._stopped = True
+        self.invalidate_place()
+        self.lookup.users.discard(self.entry.entry_id)
         for unsub in self._unsub:
             unsub()
         self._unsub.clear()
@@ -215,6 +241,13 @@ class PresenceCoordinator(DataUpdateCoordinator[Result]):
         ]
         previous_observation_time = self.last_observation_time
         result = self.resolver.update(observations, timestamp)
+        travel = self.travel.update(
+            result,
+            timestamp,
+            self.config["gps_age"],
+            self.places.zones.get("zone.home"),
+        )
+        update_place(self, result, timestamp)
         projected = project_whereabouts(
             result,
             self.places,
@@ -261,9 +294,14 @@ class PresenceCoordinator(DataUpdateCoordinator[Result]):
             }
             for key, item in result.evidence.items()
         }
-        signature = replace(
-            result, observed_at=None, room_at=None, evidence=stable_evidence
+        semantic_result = replace(
+            result,
+            observed_at=None,
+            room_at=None,
+            gps_observed_at=None,
+            evidence=stable_evidence,
         )
+        signature = (semantic_result, replace(travel, observed_at=None))
         if signature != self._published_signature:
             self._published_signature = signature
             self.async_set_updated_data(result)
@@ -310,6 +348,10 @@ class PresenceCoordinator(DataUpdateCoordinator[Result]):
 
 
 async def async_remove_entry(hass, entry):
+    from .place_service import KEY
+
+    if KEY in hass.data:
+        sync_lookup(hass, hass.data[KEY], excluding=entry.entry_id)
     remove_issues(hass, entry)
     await Store(
         hass, 1, f"{DOMAIN}.{entry.entry_id}.history", private=True, atomic_writes=True

@@ -3,7 +3,7 @@
 from typing import TYPE_CHECKING
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
-from homeassistant.const import EntityCategory
+from homeassistant.const import EntityCategory, UnitOfLength
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 if TYPE_CHECKING:
@@ -17,6 +17,9 @@ async def async_setup_entry(hass, entry, async_add_entities):
     async_add_entities(
         PresenceSensor(entry, kind, label)
         for kind, label in (
+            ("place_description", "Place description"),
+            ("distance_from_home", "Distance from home"),
+            ("travel_direction", "Travel direction"),
             ("whereabouts", "Whereabouts"),
             ("dashboard_whereabouts", "Dashboard whereabouts"),
             ("last_known_whereabouts", "Last known whereabouts"),
@@ -39,6 +42,10 @@ class PresenceSensor(CoordinatorEntity["PresenceCoordinator"], SensorEntity):
         super().__init__(entry.runtime_data)
         self._attr_device_info = presence_device_info(entry)
         self.kind = kind
+        if kind == "distance_from_home":
+            self._attr_device_class = SensorDeviceClass.DISTANCE
+            self._attr_native_unit_of_measurement = UnitOfLength.METERS
+            self._attr_suggested_display_precision = 0
         if kind in ("last_known_whereabouts", "last_observation_time"):
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
             self._attr_entity_registry_enabled_default = False
@@ -58,6 +65,16 @@ class PresenceSensor(CoordinatorEntity["PresenceCoordinator"], SensorEntity):
     @property
     def native_value(self):
         result = self.coordinator.data
+        if self.kind == "place_description":
+            return (
+                self.coordinator.place_label.label
+                if self.coordinator.place_label
+                else None
+            )
+        if self.kind == "distance_from_home":
+            return self.coordinator.travel.result.distance_m
+        if self.kind == "travel_direction":
+            return self.coordinator.travel.result.direction
         if self.kind == "dashboard_whereabouts":
             return self.coordinator.dashboard_whereabouts()["value"]
         if self.kind == "whereabouts":
@@ -84,6 +101,23 @@ class PresenceSensor(CoordinatorEntity["PresenceCoordinator"], SensorEntity):
 
     @property
     def extra_state_attributes(self):
+        if self.kind == "place_description":
+            label = self.coordinator.place_label
+            return {
+                "person_entity_id": self.coordinator.config["person"],
+                "integration": "person_presence",
+                "output_kind": self.kind,
+                "attribution": label.attribution if label else None,
+            }
+        if self.kind in ("distance_from_home", "travel_direction"):
+            travel = self.coordinator.travel.result
+            return {
+                "person_entity_id": self.coordinator.config["person"],
+                "integration": "person_presence",
+                "output_kind": self.kind,
+                "bearing": travel.bearing,
+                "observed_at": travel.observed_at,
+            }
         if self.kind == "dashboard_whereabouts":
             return self.coordinator.dashboard_whereabouts()["attributes"]
         if self.kind == "whereabouts":

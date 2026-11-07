@@ -44,7 +44,7 @@ class Release(unittest.TestCase):
                 manifest = json.loads(
                     archive.read("custom_components/person_presence/manifest.json")
                 )
-                self.assertEqual(manifest["version"], "0.2.0b2")
+                self.assertEqual(manifest["version"], "0.3.0b1")
                 for name in names:
                     self.assertEqual(archive.read(name), (ROOT / name).read_bytes())
             export = Path(directory) / "repository"

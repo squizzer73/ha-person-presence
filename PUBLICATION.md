@@ -44,3 +44,7 @@ Requirements checked on 6 November 2026:
 - https://contributors.home-assistant.io/marketplace/guides/catalog/
 - https://contributors.home-assistant.io/marketplace/guides/integrations/
 - https://contributors.home-assistant.io/marketplace/reference/validation/
+
+## 0.3.0b1
+
+The owner authorized completing release work on 7 November 2026 after the approved live pilot. Publish only the exact commit that passes tests/build, hassfest and Marketplace checks, with the deterministic install ZIP and SHA256SUMS. See [what changed](docs/releases/0.3.0b1.md). Catalog submission [hacs/default#13509](https://github.com/hacs/default/pull/13509) remains open with no maintainer feedback at the pre-release check. Acceptance and field accuracy are not claimed.

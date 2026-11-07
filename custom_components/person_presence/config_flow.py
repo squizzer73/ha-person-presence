@@ -13,9 +13,11 @@ from homeassistant.helpers import selector
 from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
+from .geocoding import validate_options
 from .inputs import (
     DEFAULTS,
     SOURCE_FIELDS,
+    charging_age_limit,
     is_position_source,
     is_string_room_source,
     is_worn_source,
@@ -98,6 +100,12 @@ class DeviceFlow:
 
     def _validate_sources(self, config, check_devices=None):
         validate_config(config)
+        if config.get("place_lookup") and any(
+            {**e.data, **e.options}.get("place_lookup")
+            and {**e.data, **e.options}.get("person") != config["person"]
+            for e in self.hass.config_entries.async_entries(DOMAIN)
+        ):
+            raise ValueError("geocoder_owned")
         registry = er.async_get(self.hass)
         for device in config["devices"] if check_devices is None else check_devices:
             for field in SOURCE_FIELDS:
@@ -214,8 +222,8 @@ class DeviceFlow:
                 errors["base"] = "invalid_device"
         fields = {}
         for field in SOURCE_FIELDS:
-            candidates = catalog.candidates(
-                field, current_entity_id=self._draft.get(field)
+            candidates = catalog.person_candidates(
+                self._config["person"], field, current_entity_id=self._draft.get(field)
             )
             domains = (
                 "device_tracker"
@@ -240,12 +248,31 @@ class DeviceFlow:
                 )
             ] = str
         return self.async_show_form(
-            step_id="sources", data_schema=vol.Schema(fields), errors=errors
+            step_id="sources",
+            data_schema=vol.Schema(fields),
+            errors=errors,
+            description_placeholders={
+                "suggestions": "\n".join(
+                    f"{c.entity_id} ({c.provider}; {c.basis})"
+                    + (" — " + ", ".join(c.warnings) if c.warnings else "")
+                    for c in catalog.person_candidates(
+                        self._config["person"], "tracker"
+                    )
+                    if c.basis in ("person_assignment", "related_registry_device")
+                )
+                or "No assigned GPS sources found. Choose sources below."
+            },
         )
 
     async def async_step_rules(self, user_input=None):
         if user_input is not None:
-            return await self._save_device({**self._draft, **user_input})
+            device = {**self._draft, **user_input}
+            custom = device.pop(
+                "use_custom_charging_age", self._draft.get("charging_age") is not None
+            )
+            if not custom:
+                device.pop("charging_age", None)
+            return await self._save_device(device)
         next_priority = (
             max((d["priority"] for d in self._config.get("devices", [])), default=0) + 1
         )
@@ -261,6 +288,25 @@ class DeviceFlow:
                     "exclude_charging",
                     default=self._draft.get("exclude_charging", False),
                 ): bool,
+                vol.Optional(
+                    "use_custom_charging_age",
+                    default=self._draft.get("charging_age") is not None,
+                ): bool,
+                vol.Optional(
+                    "charging_age",
+                    default=charging_age_limit(
+                        self._draft,
+                        self._config.get("signal_age", 600),
+                        SourceCatalog.from_hass(self.hass),
+                    ),
+                ): selector.NumberSelector(
+                    selector.NumberSelectorConfig(
+                        min=1,
+                        max=86400,
+                        mode=selector.NumberSelectorMode.BOX,
+                        unit_of_measurement="seconds",
+                    )
+                ),
             }
         )
         return self.async_show_form(step_id="rules", data_schema=schema)
@@ -274,6 +320,7 @@ class DeviceFlow:
             "wearable",
             "exclude_charging",
             "timestamp_attribute",
+            "charging_age",
             *SOURCE_FIELDS,
         }
         device = {k: v for k, v in current.items() if k not in editable}
@@ -318,6 +365,7 @@ class DeviceFlow:
                 "move_earlier",
                 "move_later",
                 "settings",
+                "geocoding",
                 "finish",
             ],
             description_placeholders={
@@ -368,6 +416,59 @@ class DeviceFlow:
                 return await self.async_step_menu()
         return self.async_show_form(
             step_id="remove", data_schema=self._device_choice(), errors=error
+        )
+
+    async def async_step_geocoding(self, user_input=None):
+        owners = [
+            e
+            for e in self.hass.config_entries.async_entries(DOMAIN)
+            if {**e.data, **e.options}.get("place_lookup")
+            and {**e.data, **e.options}.get("person") != self._config["person"]
+        ]
+        current = self._config.get("place_lookup", {})
+        errors = {}
+        if user_input is not None:
+            try:
+                options = validate_options(user_input)
+                if user_input.get("geocode") and not (options or owners):
+                    raise ValueError("invalid_geocoder")
+                if owners and options:
+                    raise ValueError("geocoder_owned")
+                self._config["geocode"] = bool(user_input.get("geocode", False))
+                if not owners:
+                    self._config["place_lookup"] = options
+                return await self.async_step_menu()
+            except ValueError as err:
+                errors["base"] = str(err)
+        fields: dict[Any, Any] = {
+            vol.Optional("geocode", default=self._config.get("geocode", False)): bool
+        }
+        if not owners:
+            fields.update(
+                {
+                    vol.Optional(
+                        "endpoint",
+                        description={"suggested_value": current.get("endpoint", "")},
+                    ): str,
+                    vol.Optional(
+                        "contact",
+                        description={"suggested_value": current.get("contact", "")},
+                    ): str,
+                    vol.Optional(
+                        "authorized", default=current.get("authorized", False)
+                    ): bool,
+                    vol.Optional(
+                        "local_http", default=current.get("local_http", False)
+                    ): bool,
+                }
+            )
+        return self.async_show_form(
+            step_id="geocoding",
+            data_schema=vol.Schema(fields),
+            errors=errors,
+            description_placeholders={
+                "owner": owners[0].title if owners else "this entry"
+            },
         )
 
     async def async_step_settings(self, user_input=None):

@@ -1,3 +1,17 @@
+# Validation — 0.3.0b1
+
+104 Python tests pass in isolated HA/pure harnesses, with three Node card-model tests. Ruff lint/format and mypy (20 modules) pass. Synthetic Chromium browser checks cover a fictional seven-person household at 390px and 900px, current/last-known/unknown displays, more-info, editor changes and text escaping; both screenshots were visually inspected. This is not a live HA frontend or physical presence acceptance check.
+
+Independent review identified concurrent frontend registration, fragmented JSON response handling and retention depending on future lookup requests. Each received a failing regression and a fix. Additional tests prove resource setup can retry without registering the route twice, and expired cache data is removed from private storage without new requests and during startup. Optional endpoint changes remain preview-only until Save; enabling without any configured service is rejected. Existing legacy entries and registry choices remain covered by six-person upgrade tests.
+
+An explicitly approved household pilot installed this exact runtime with one restart. All six entries loaded; 54 existing registrations, five dashboard profiles, six Person assignments and provider settings were preserved. Eighteen sensors were added (72 registrations total, 54 enabled); no enabled entities were missing or unavailable. The card resource was registered once and its served bytes matched the tested build; the integration reported no errors. Browser access was disabled, so no live frontend rendering claim is made. No real geocoding provider or API credentials were used; lookup stayed off. Physical accuracy, watch-only provider coverage and broader household testing remain ongoing. External checks and publication evidence are recorded after the exact commit passes CI.
+
+# Local 0.2.0b3 charging-window candidate
+
+83 tests pass locally, including provider cadence boundaries, explicit charging exclusion, unavailable/invalid source values, unknown-provider compatibility, custom overrides, malformed limits, unchanged wearing expiry and a real-HA automatic/custom options round-trip. The independent review identified automatic limits being pinned by form defaults; an explicit custom toggle now preserves and restores automatic mode. Mutation of the fix back to unconditional save reproduced the intended options assertion failure. Lint, formatting and type checks cover the candidate.
+
+At the original b3 validation point the candidate was local only. A later explicitly approved pilot installed b3 with one restart and preserved the existing configuration. Source mappings were preserved during that pilot. The b3 charging fix is included in this newer candidate.
+
 # Validation — 0.2.0b2
 
 ## Automated checks

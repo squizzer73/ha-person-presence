@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width"
+  /><title>Person Presence synthetic family</title
+  ><style>
+    body {
+      font: 16px Arial;
+      background: #111827;
+      color: #f3f4f6;
+      margin: 16px;
+      --primary-text-color: #f3f4f6;
+      --secondary-text-color: #b9c2d0;
+      --card-background-color: #1e293b;
+      --divider-color: #38465b;
+      --warning-color: #fbbf24;
+      --secondary-background-color: #374151;
+    }
+    main {
+      max-width: 650px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 14px;
+      color: #b9c2d0;
+    }
+    button,
+    input {
+      font: inherit;
+    }
+  </style>
+  <main>
+    <h1>Person Presence · fictional household preview</h1>
+    <person-presence-card></person-presence-card>
+  </main>
+  <script type="module">
+    import '/custom_components/person_presence/www/person-presence-card.js';
+    const states = {};
+    const add = (person, name, value, freshness, device) => {
+      states[`person.${person}`] = {
+        state: 'home',
+        attributes: { friendly_name: name },
+      };
+      states[`sensor.${person}_display`] = {
+        state: value,
+        attributes: {
+          person_entity_id: `person.${person}`,
+          integration: 'person_presence',
+          output_kind: 'dashboard_whereabouts',
+          freshness,
+          selected_device_name: device,
+          observed_at: new Date(Date.now() - 45 * 60000).toISOString(),
+        },
+      };
+    };
+    add('river', 'River', 'Study', 'current', 'Watch');
+    add('morgan', 'Morgan', 'City Library', 'current', 'Phone');
+    add('casey', 'Casey', 'Park (last known)', 'last_known');
+    add('alex', 'Alex', 'unknown', 'unknown');
+    add('eden', 'Eden', 'Home', 'current', 'Phone');
+    add('blair', 'Blair', 'Away', 'current', 'Phone');
+    add('finley', 'Finley', 'Kitchen', 'current', 'Watch');
+    states['sensor.morgan_distance'] = {
+      state: '2.4',
+      attributes: {
+        person_entity_id: 'person.morgan',
+        integration: 'person_presence',
+        output_kind: 'distance_from_home',
+        unit_of_measurement: 'km',
+      },
+    };
+    states['sensor.morgan_direction'] = {
+      state: 'towards_home',
+      attributes: {
+        person_entity_id: 'person.morgan',
+        integration: 'person_presence',
+        output_kind: 'travel_direction',
+      },
+    };
+    states['sensor.blair_place'] = {
+      state: 'Town centre',
+      attributes: {
+        person_entity_id: 'person.blair',
+        integration: 'person_presence',
+        output_kind: 'place_description',
+        attribution: 'Example provider attribution',
+      },
+    };
+    window.fixtureHass = { states };
+    const card = document.querySelector('person-presence-card');
+    card.setConfig({
+      title: 'Family',
+      people: [
+        'person.river',
+        'person.morgan',
+        'person.casey',
+        'person.alex',
+        'person.eden',
+        'person.blair',
+        'person.finley',
+      ],
+    });
+    card.hass = window.fixtureHass;
+    window.moreInfo = null;
+    card.addEventListener(
+      'hass-more-info',
+      (e) => (window.moreInfo = e.detail.entityId),
+    );
+  </script>
+</html>

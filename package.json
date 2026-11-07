@@ -1,0 +1,12 @@
+{
+  "name": "ha-person-presence",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:card": "node --test tests/frontend/card.test.mjs",
+    "test:browser": "node tests/frontend/browser.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0"
+  }
+}

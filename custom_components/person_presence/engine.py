@@ -45,6 +45,8 @@ class Result:
     zone_id: str | None = None
     source_entity_id: str | None = None
     wearing_status: str = "unconfirmed"
+    gps_observed_at: float | None = None
+    gps_source_entity_id: str | None = None
 
     @property
     def signature(self):
@@ -162,6 +164,10 @@ class Resolver:
                     latitude=obs.latitude if coordinates else None,
                     longitude=obs.longitude if coordinates else None,
                     accuracy=obs.accuracy if coordinates else None,
+                    gps_observed_at=obs.location_at if coordinates else None,
+                    gps_source_entity_id=obs.gps_source_entity_id
+                    if coordinates
+                    else None,
                     context="room"
                     if selected_room
                     else "home"

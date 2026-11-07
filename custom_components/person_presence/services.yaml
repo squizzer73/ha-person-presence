@@ -1,0 +1,3 @@
+clear_place_cache:
+  name: Clear place cache
+  description: Deletes cached external place descriptions for all people. Does not delete dashboard last-known history. Requires an administrator.

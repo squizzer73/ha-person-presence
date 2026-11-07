@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Who should we locate?",
-        "description": "Choose an existing Home Assistant Person. A login is not required. Existing Person tracking and automations stay unchanged. Leave the name empty to use the person’s name.",
+        "description": "Choose an existing Home Assistant Person. A login is not required. Existing Person tracking and automations stay unchanged. Leave the name empty to use the person\u2019s name.",
         "data": {
           "person": "Person",
           "name": "Name"
@@ -25,7 +25,7 @@
           "name": "Name",
           "gps_age": "Maximum GPS observation age (seconds)",
           "room_age": "Maximum room observation age (seconds)",
-          "signal_age": "Maximum charging/worn signal age (seconds)",
+          "signal_age": "Maximum wearing/local signal age; fallback charging age (seconds)",
           "settle": "Settling time (seconds)",
           "max_accuracy": "Maximum GPS error (metres)"
         }
@@ -54,7 +54,8 @@
           "move_earlier": "Move a device earlier",
           "move_later": "Move a device later",
           "settings": "Advanced timing and accuracy",
-          "finish": "Review and save"
+          "finish": "Review and save",
+          "geocoding": "Optional place lookup"
         }
       },
       "source_mode": {
@@ -66,8 +67,8 @@
         }
       },
       "sources": {
-        "title": "Choose this device’s sources",
-        "description": "GPS must report a geographical position; Bluetooth home/away cannot identify an outdoor zone. A room sensor should have its matching local home/away guard. Wearing is optional and cannot be inferred from not charging. Manual sources require checking their meaning in preview.",
+        "title": "Choose this device\u2019s sources",
+        "description": "GPS must report a geographical position; Bluetooth home/away cannot identify an outdoor zone. A room sensor should have its matching local home/away guard. Wearing is optional and cannot be inferred from not charging. Manual sources require checking their meaning in preview.\n\nSuggested sources (confirm which physical device each belongs to):\n{suggestions}",
         "data": {
           "tracker": "Geographical tracker",
           "room": "Room or area sensor",
@@ -90,11 +91,13 @@
       },
       "rules": {
         "title": "Set preference and eligibility",
-        "description": "Lower preference numbers are considered first; confirmed worn evidence takes precedence. Charging phones may still be carried in cars or pockets. Only exclude them when that matches your use.",
+        "description": "Lower preference numbers are considered first; confirmed worn evidence takes precedence. Charging phones may still be carried in cars or pockets. Only exclude them when that matches your use. Charging has a separate age limit: iCloud3 defaults are 30 minutes for wearables and 150 minutes for other devices, or the shared limit if longer. Other providers use the shared limit. Enable custom charging status age to use the number below; leave it off to follow the provider default. Turning it off again removes a saved override. Longer windows tolerate delayed reports but take longer to expire if a provider stops updating. Wearing and location limits are unchanged.",
         "data": {
           "priority": "Preference (lower first)",
           "wearable": "Exclude this wearable while charging",
-          "exclude_charging": "Also exclude a charging phone/tablet"
+          "exclude_charging": "Also exclude a charging phone/tablet",
+          "charging_age": "Maximum charging status age (seconds)",
+          "use_custom_charging_age": "Use a custom charging status age"
         }
       },
       "preview": {
@@ -116,6 +119,17 @@
         "data": {
           "device": "Device"
         }
+      },
+      "geocoding": {
+        "title": "Optional place lookup",
+        "description": "Off by default. Enabling sends rounded outdoor coordinates to your configured external service. Supply a self-hosted or provider-authorized Nominatim-compatible reverse endpoint; no public service is bundled. Service configuration belongs to {owner}. Lookups do not change tracking decisions. Clear cached descriptions using the Clear place cache action.",
+        "data": {
+          "geocode": "Enable place lookup for this person",
+          "endpoint": "Reverse lookup endpoint URL",
+          "contact": "Provider contact identifier",
+          "authorized": "I am authorized to use this endpoint for automated location lookup",
+          "local_http": "Allow HTTP for an explicitly local self-hosted endpoint"
+        }
       }
     },
     "error": {
@@ -127,7 +141,9 @@
       "self_reference": "This integration cannot use its own outputs as inputs.",
       "source_missing": "A selected source does not exist in the current state list.",
       "last_device": "Keep at least one device; remove the integration entry to stop tracking.",
-      "unsupported_source": "This source does not expose the expected capability. Choose a suitable source or use advanced manual mapping and review its meaning."
+      "unsupported_source": "This source does not expose the expected capability. Choose a suitable source or use advanced manual mapping and review its meaning.",
+      "invalid_geocoder": "Use an authorized HTTPS endpoint, or explicitly permit local self-hosted HTTP. The public OSMF endpoint is not supported.",
+      "geocoder_owned": "Configure the shared lookup service in its existing owner entry."
     },
     "abort": {
       "invalid_person": "Select an existing Person and enter a name.",
@@ -146,7 +162,7 @@
     "step": {
       "user": {
         "title": "Who should we locate?",
-        "description": "Choose an existing Home Assistant Person. A login is not required. Existing Person tracking and automations stay unchanged. Leave the name empty to use the person’s name.",
+        "description": "Choose an existing Home Assistant Person. A login is not required. Existing Person tracking and automations stay unchanged. Leave the name empty to use the person\u2019s name.",
         "data": {
           "person": "Person",
           "name": "Name"
@@ -167,7 +183,7 @@
           "name": "Name",
           "gps_age": "Maximum GPS observation age (seconds)",
           "room_age": "Maximum room observation age (seconds)",
-          "signal_age": "Maximum charging/worn signal age (seconds)",
+          "signal_age": "Maximum wearing/local signal age; fallback charging age (seconds)",
           "settle": "Settling time (seconds)",
           "max_accuracy": "Maximum GPS error (metres)"
         }
@@ -196,7 +212,8 @@
           "move_earlier": "Move a device earlier",
           "move_later": "Move a device later",
           "settings": "Advanced timing and accuracy",
-          "finish": "Review and save"
+          "finish": "Review and save",
+          "geocoding": "Optional place lookup"
         }
       },
       "source_mode": {
@@ -208,8 +225,8 @@
         }
       },
       "sources": {
-        "title": "Choose this device’s sources",
-        "description": "GPS must report a geographical position; Bluetooth home/away cannot identify an outdoor zone. A room sensor should have its matching local home/away guard. Wearing is optional and cannot be inferred from not charging. Manual sources require checking their meaning in preview.",
+        "title": "Choose this device\u2019s sources",
+        "description": "GPS must report a geographical position; Bluetooth home/away cannot identify an outdoor zone. A room sensor should have its matching local home/away guard. Wearing is optional and cannot be inferred from not charging. Manual sources require checking their meaning in preview.\n\nSuggested sources (confirm which physical device each belongs to):\n{suggestions}",
         "data": {
           "tracker": "Geographical tracker",
           "room": "Room or area sensor",
@@ -232,11 +249,13 @@
       },
       "rules": {
         "title": "Set preference and eligibility",
-        "description": "Lower preference numbers are considered first; confirmed worn evidence takes precedence. Charging phones may still be carried in cars or pockets. Only exclude them when that matches your use.",
+        "description": "Lower preference numbers are considered first; confirmed worn evidence takes precedence. Charging phones may still be carried in cars or pockets. Only exclude them when that matches your use. Charging has a separate age limit: iCloud3 defaults are 30 minutes for wearables and 150 minutes for other devices, or the shared limit if longer. Other providers use the shared limit. Enable custom charging status age to use the number below; leave it off to follow the provider default. Turning it off again removes a saved override. Longer windows tolerate delayed reports but take longer to expire if a provider stops updating. Wearing and location limits are unchanged.",
         "data": {
           "priority": "Preference (lower first)",
           "wearable": "Exclude this wearable while charging",
-          "exclude_charging": "Also exclude a charging phone/tablet"
+          "exclude_charging": "Also exclude a charging phone/tablet",
+          "charging_age": "Maximum charging status age (seconds)",
+          "use_custom_charging_age": "Use a custom charging status age"
         }
       },
       "preview": {
@@ -258,6 +277,17 @@
         "data": {
           "device": "Device"
         }
+      },
+      "geocoding": {
+        "title": "Optional place lookup",
+        "description": "Off by default. Enabling sends rounded outdoor coordinates to your configured external service. Supply a self-hosted or provider-authorized Nominatim-compatible reverse endpoint; no public service is bundled. Service configuration belongs to {owner}. Lookups do not change tracking decisions. Clear cached descriptions using the Clear place cache action.",
+        "data": {
+          "geocode": "Enable place lookup for this person",
+          "endpoint": "Reverse lookup endpoint URL",
+          "contact": "Provider contact identifier",
+          "authorized": "I am authorized to use this endpoint for automated location lookup",
+          "local_http": "Allow HTTP for an explicitly local self-hosted endpoint"
+        }
       }
     },
     "error": {
@@ -269,7 +299,9 @@
       "self_reference": "This integration cannot use its own outputs as inputs.",
       "source_missing": "A selected source does not exist in the current state list.",
       "last_device": "Keep at least one device; remove the integration entry to stop tracking.",
-      "unsupported_source": "This source does not expose the expected capability. Choose a suitable source or use advanced manual mapping and review its meaning."
+      "unsupported_source": "This source does not expose the expected capability. Choose a suitable source or use advanced manual mapping and review its meaning.",
+      "invalid_geocoder": "Use an authorized HTTPS endpoint, or explicitly permit local self-hosted HTTP. The public OSMF endpoint is not supported.",
+      "geocoder_owned": "Configure the shared lookup service in its existing owner entry."
     },
     "abort": {
       "invalid_person": "Select an existing Person and enter a name.",
@@ -288,6 +320,12 @@
     "missing_sources": {
       "title": "Person Presence source needs attention",
       "description": "These configured source entities are missing: {sources}.\n\n[Configure Person Presence](/config/integrations/integration/person_presence) and edit the affected device mappings. Existing settings are retained. Temporary stale GPS and normal away Bluetooth are not configuration repairs."
+    }
+  },
+  "services": {
+    "clear_place_cache": {
+      "name": "Clear place cache",
+      "description": "Deletes cached external place descriptions for all people. Does not delete dashboard last-known history. Requires an administrator."
     }
   }
 }

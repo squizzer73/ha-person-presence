@@ -9,3 +9,5 @@
 - **Last observation diagnostic not changing:** when enabled, the timestamp diagnostic updates independently when a newer accepted observation arrives. The primary and legacy sensors do not publish age-only changes. Current age is also available in preview rather than stored as a live counter.
 
 Download the integration's diagnostics for support only after reviewing the output. The integration-owned payload includes aliases, settings and reason codes, not raw location payloads or household names. HA adds its own system/integration metadata around that payload, so review the full file before sharing. See privacy.md.
+
+- **Charging status expires between iCloud3 updates (b3 candidate):** use automatic charging age or set a bounded custom age in device rules to suit the provider cadence. Automatic iCloud3 limits are 30 minutes for wearables and 150 for other devices, or the shared signal limit if longer; other providers keep the shared limit. This does not refresh the original charging observation or extend wearing/GPS/room/local-guard ages. Expired or unavailable required signals still exclude the device.

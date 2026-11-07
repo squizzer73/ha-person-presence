@@ -30,9 +30,19 @@ You can [report a bug or suggest an idea here](https://github.com/squizzer73/ha-
 
 ## Before you start
 
-Version **0.2.0b2** is a public beta. [Download the prerelease](https://github.com/squizzer73/ha-person-presence/releases/tag/0.2.0b2), or use the Marketplace button above to add it as a custom repository. It isn't in the shared catalog yet.
+Version **0.3.0b1** is a public beta. [Download the prerelease](https://github.com/squizzer73/ha-person-presence/releases/tag/0.3.0b1), or use the Marketplace button above to add it as a custom repository. It isn't in the shared catalog yet.
 
-You'll need **Home Assistant Core 2026.11 or later**. Testing currently targets 2026.11.0; later releases need compatibility checks. Existing integrations such as the Companion app, iCloud3 and Bermuda supply the observations. Person Presence doesn't add a cloud account or location service, and doesn't send commands to your devices.
+You'll need **Home Assistant Core 2026.11 or later**. Testing currently targets 2026.11.0; later releases need compatibility checks. Existing integrations such as the Companion app, iCloud3 and Bermuda supply the observations. Person Presence doesn't add a cloud tracking account or send commands to your devices. Optional place lookup requires a separately configured service and explicit enablement.
+
+## Family card, travel and optional places
+
+This beta adds a bundled **Person Presence** family card, **Distance from home**, **Travel direction**, optional **Place description**, and source suggestions based on existing Person assignments. It also includes separate charging-status timeouts, to better accommodate providers such as iCloud3.
+
+The card clearly separates current, last-known and unknown locations. It can show the selected device, distance/direction and an approximate place label. It does not change existing dashboards or Person assignments. See [family card and travel setup](docs/family-features.md).
+
+Distance and direction use fresh accepted GPS from the selected device. Room updates cannot renew an old GPS fix. A device switch resets movement direction, and old locations remain dashboard history rather than current travel information.
+
+Place lookup is optional and **off by default**. It requires your own authorized or self-hosted Nominatim-compatible service; no public endpoint is bundled. Enabling it sends rounded outdoor coordinates to that service. Existing zones and room names still take precedence, and external labels never change tracking decisions.
 
 ## Setup
 
@@ -77,11 +87,13 @@ Installing Person Presence doesn't change iCloud3 settings, request extra locati
 
 ## Rules and limits
 
+**Separate charging-status timeouts:** charging status has a separate bounded age. iCloud3 defaults are 30 minutes for wearables and 150 minutes for other devices, with the shared signal age used if longer. Other providers retain the shared signal-age limit. Device rules offer an automatic/custom choice; the numeric charging age is used only with custom enabled. Longer windows tolerate delayed charging reports but also take longer to expire when a provider stops reporting. GPS, room, wearing and local-guard limits are unchanged, and not charging still does not prove worn.
+
 Confirmed worn evidence takes precedence; otherwise lower preference numbers come first. Charging wearables and explicitly unworn devices are excluded. Configured eligibility signals that cannot be assessed exclude the device with an uncertainty explanation. Without a worn sensor, a watch left on a table may still be selected. Not charging does not prove worn.
 
 Phones remain eligible while charging by default, because they may charge in a car or pocket. Turn on charging exclusion only where that matches your use. A confirmed-worn device without a fresh location prevents a confident fallback to an abandoned phone.
 
-Defaults: GPS age 300 seconds, room age 60 seconds, eligibility signal age 600 seconds, settling 15 seconds and GPS error up to 100 metres. Older entries retain their configured limits. A newer entity update is not necessarily a newer observation: iCloud3 uses its actual located timestamp. Provider/report-only timestamps carry a quality limitation. Ambiguous or nonexistent local timestamps are rejected rather than guessed.
+Defaults: GPS age 300 seconds, room age 60 seconds, wearing/local signal age 600 seconds, settling 15 seconds and GPS error up to 100 metres. Older entries retain their configured limits. A newer entity update is not necessarily a newer observation: iCloud3 uses its actual located timestamp. Provider/report-only timestamps carry a quality limitation. Ambiguous or nonexistent local timestamps are rejected rather than guessed.
 
 Bermuda room reports are estimates. Use its matching local home/away tracker as a guard; report time alone is not proof of a new radio sighting. Away evidence suppresses an older room, and equal-time contradictory room/away evidence yields Unknown. No Bluetooth disappearance can identify a woodland zone: that needs a fresh outdoor fix from the carried device's existing provider.
 

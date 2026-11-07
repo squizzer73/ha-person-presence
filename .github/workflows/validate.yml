@@ -15,6 +15,10 @@ jobs:
       - run: ruff check .
       - run: ruff format --check .
       - run: mypy custom_components/person_presence
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test tests/frontend/card.test.mjs
       - run: python scripts/build_release.py --output dist/beta
   hassfest:
     runs-on: ubuntu-latest

@@ -1,6 +1,6 @@
 """Capability-based candidate choices; suggestions never establish device identity."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 
 from .inputs import is_position_source, is_string_room_source, is_worn_source
@@ -113,6 +113,32 @@ class SourceCatalog:
                 )
             )
         return result
+
+    def person_candidates(self, person_entity_id, role, *, current_entity_id=None):
+        person = self.snapshots.get(person_entity_id)
+        assigned = (
+            set(person.attributes.get("device_trackers", [])) if person else set()
+        )
+        devices = {self.snapshots[e].device_id for e in assigned if e in self.snapshots}
+        devices.discard(None)
+        result = []
+        for candidate in self.candidates(role, current_entity_id=current_entity_id):
+            source = self.snapshots.get(candidate.entity_id)
+            basis = (
+                "person_assignment"
+                if candidate.entity_id in assigned
+                else (
+                    "related_registry_device"
+                    if source and source.device_id in devices
+                    else candidate.basis
+                )
+            )
+            warnings = candidate.warnings
+            if source and source.state in ("unknown", "unavailable"):
+                warnings += ("Source unavailable",)
+            result.append(replace(candidate, basis=basis, warnings=warnings))
+        rank = {"person_assignment": 0, "related_registry_device": 1}
+        return sorted(result, key=lambda c: (rank.get(c.basis, 2), c.entity_id))
 
     def suggestions(self, entity_id):
         seed = self.snapshots.get(entity_id)

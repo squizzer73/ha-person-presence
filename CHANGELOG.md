@@ -1,4 +1,19 @@
+# 0.3.0b1 — 7 November 2026
+
+- Add a bundled family overview card with explicit current/last-known/unknown states, selected-device detail and a visual editor.
+- Add GPS-only distance, compass bearing and coarse direction, with independent GPS observation timestamps and baseline resets.
+- Add optional authorized-service place descriptions, shared bounded private cache and an admin cache-clear action. No public service endpoint is bundled or enabled.
+- Show Person-assignment and registry-based source suggestions without silently creating devices.
+- Include the b3 charging-window fix; preserve existing configuration and entity identities. Three additive sensors per entry.
+
 # Changelog
+
+## 0.2.0b3 — local candidate, unreleased
+
+- Separates charging-state freshness from wearing/local-presence freshness.
+- Uses bounded iCloud3 charging defaults (30 minutes for wearables, 150 minutes for other devices, or the shared age if longer).
+- Adds automatic/custom per-device charging ages, including returning to automatic without changing other signal limits.
+- Keeps explicit charging/unworn exclusions and strict location limits; expired, unknown or unavailable required charging signals remain ineligible.
 
 ## 0.2.0b2 — public beta, 6 November 2026
 

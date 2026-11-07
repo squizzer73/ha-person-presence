@@ -95,3 +95,40 @@ class Places(unittest.TestCase):
     def test_label_changes_preserve_identity(self):
         catalog = places.PlaceCatalog({"studio": "New name"}, [])
         self.assertEqual(catalog.area_name("studio"), "New name")
+
+
+class PersonSuggestions(unittest.TestCase):
+    def test_assigned_rank_and_related_sources_do_not_group_devices(self):
+        now = datetime.now(UTC)
+
+        def row(id, platform, device, attrs, value="home"):
+            return sources.SourceSnapshot(id, value, attrs, now, platform, device)
+
+        gps = {"latitude": 1, "longitude": 2, "source_type": "gps"}
+        catalog = sources.SourceCatalog(
+            [
+                row(
+                    "person.river",
+                    "person",
+                    None,
+                    {"device_trackers": ["device_tracker.z", "device_tracker.y"]},
+                ),
+                row("device_tracker.a", "mobile_app", "a", gps),
+                row("device_tracker.z", "mobile_app", "z", gps, "unavailable"),
+                row("device_tracker.y", "icloud3", "z", gps),
+                row("device_tracker.ours", "person_presence", "z", gps),
+                row("sensor.z_charge", "mobile_app", "z", {}, "Charging"),
+            ]
+        )
+        candidates = catalog.person_candidates("person.river", "tracker")
+        self.assertEqual(
+            [c.entity_id for c in candidates],
+            ["device_tracker.y", "device_tracker.z", "device_tracker.a"],
+        )
+        self.assertEqual(candidates[0].basis, "person_assignment")
+        self.assertIn("Source unavailable", candidates[1].warnings)
+        self.assertEqual(
+            catalog.person_candidates("person.river", "charging")[0].basis,
+            "related_registry_device",
+        )
+        self.assertEqual(len(candidates), 3)

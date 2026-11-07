@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 
 DESCRIPTIONS = {
+    "charging_status_grace": "Charging observation is accepted within its separate age window; wearing freshness is unchanged",
     "unsupported_room_source": "Room source is not a supported string area sensor",
     "unsupported_tracker_source": "Tracker reports a connection rather than geographical position",
     "unsupported_worn_source": "Source does not report wearing status",
