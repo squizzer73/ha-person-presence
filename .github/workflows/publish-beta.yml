@@ -1,12 +1,12 @@
-name: Publish approved 0.2.0b2 beta
+name: Publish approved 0.3.0b1 beta
 on:
   push:
     branches: [main]
-    paths: [.github/release-requests/0.2.0b2.json]
+    paths: [.github/release-requests/0.3.0b1.json]
   workflow_dispatch:
 permissions: {}
 concurrency:
-  group: publish-person-presence-0.2.0b2
+  group: publish-person-presence-0.3.0b1
   cancel-in-progress: false
 jobs:
   publish:
@@ -18,19 +18,19 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: squizzer73/ha-person-presence
-      RELEASE_SHA: 60b4e04c6e5ddaf42c56256a64937f7020126fd7
-      RELEASE_TAG: 0.2.0b2
+      RELEASE_SHA: 8f7ecc0306c166d68356ccb2b7270e1b28b1bf78
+      RELEASE_TAG: 0.3.0b1
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 60b4e04c6e5ddaf42c56256a64937f7020126fd7
+          ref: 8f7ecc0306c166d68356ccb2b7270e1b28b1bf78
           persist-credentials: false
       - name: Verify the approved commit passed all required checks
         shell: bash
         run: |
-          gh run watch 42217187794 --exit-status --interval 10
-          gh api repos/$GH_REPO/actions/runs/42217187794 > "$RUNNER_TEMP/approved-run.json"
-          gh api repos/$GH_REPO/actions/runs/42217187794/jobs > "$RUNNER_TEMP/approved-jobs.json"
+          gh run watch 42324172437 --exit-status --interval 10
+          gh api repos/$GH_REPO/actions/runs/42324172437 > "$RUNNER_TEMP/approved-run.json"
+          gh api repos/$GH_REPO/actions/runs/42324172437/jobs > "$RUNNER_TEMP/approved-jobs.json"
           python3 - <<'PY'
           import json, os
           from pathlib import Path
@@ -52,11 +52,11 @@ jobs:
           python3 - <<'PY'
           import hashlib
           from pathlib import Path
-          assert hashlib.sha256(Path('person-presence-0.2.0b2.zip').read_bytes()).hexdigest() == 'c49a555ab399c5d493d43a882fa5e9a24b538310d3f6e4d5334959dfa4956130'
+          assert hashlib.sha256(Path('person-presence-0.3.0b1.zip').read_bytes()).hexdigest() == 'eb8c45562e3b40acd53eae5f90e5e24e0474defa6129b41928c8f1669dfd6e87'
           PY
       - name: Prepare public beta notes
-        run: cp docs/releases/0.2.0b2.md "$RUNNER_TEMP/release-notes.md"
+        run: cp docs/releases/0.3.0b1.md "$RUNNER_TEMP/release-notes.md"
       - name: Create a draft with both assets, then publish as a prerelease
         run: |
-          gh release create "$RELEASE_TAG" dist/beta/person-presence-0.2.0b2.zip dist/beta/SHA256SUMS --target "$RELEASE_SHA" --title "Person Presence 0.2.0b2 — public beta" --notes-file "$RUNNER_TEMP/release-notes.md" --draft --prerelease
+          gh release create "$RELEASE_TAG" dist/beta/person-presence-0.3.0b1.zip dist/beta/SHA256SUMS --target "$RELEASE_SHA" --title "Person Presence 0.3.0b1 — public beta" --notes-file "$RUNNER_TEMP/release-notes.md" --draft --prerelease
           gh release edit "$RELEASE_TAG" --draft=false --prerelease --latest=false
