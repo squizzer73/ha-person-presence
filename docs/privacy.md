@@ -6,6 +6,6 @@ Normal entity states and history can reveal sensitive room/zone information. HA 
 
 The integration-owned diagnostics payload is allowlisted. Home Assistant wraps it with its own system/integration metadata and internal configuration-entry identifiers; review the complete download before sharing. They omit real entity/device/person names and identifiers, coordinates/home geometry, account data, Bluetooth addresses/IRKs, raw payloads and free-form notes. Consistent aliases allow sources to be compared within one export. Reason codes and boolean quality flags remain useful for troubleshooting.
 
-## Optional place lookup in the 0.3 candidate
+## Optional place lookup in the 0.3 beta
 
 Off by default, with no bundled external endpoint. Enabling it sends rounded accepted outdoor coordinates and a contact identifier to the explicitly configured service. Its responses are cached privately for 30 days, at most 1000 records. Cached coordinates are sensitive. The admin Clear place cache action deletes descriptions separately from dashboard last-known history. No raw lookup settings, coordinates or labels are added to anonymous diagnostics. See [family features](family-features.md).

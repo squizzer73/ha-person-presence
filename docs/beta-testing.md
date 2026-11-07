@@ -61,6 +61,6 @@ Suggestions or anything confusing:
 
 Use fictional names and places. Leave out coordinates, routes, credentials, Bluetooth identity keys and raw provider payloads. Screenshots can expose names, maps or other private information, so crop/redact them before sharing. Diagnostics are optional: inspect the whole download, including metadata HA adds, before posting it. See [privacy](privacy.md) and [security reporting](../SECURITY.md).
 
-## Family-features candidate checks
+## Family-features beta checks
 
 Check card rows at mobile and desktop widths, renamed sensors, last-known age and unavailable sources. For travel, compare real consecutive GPS reports with device switches and expiry; BLE room updates alone must not change direction. Confirm place lookup is off after upgrade. If you have an authorized service, test endpoint configuration, attribution, timeout/disable and the admin cache-clear action without sharing coordinates or endpoint details in public reports. Existing Person assignments and dashboards must remain unchanged.

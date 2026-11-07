@@ -32,7 +32,7 @@ The validated release branch `codex/release-0.2.0b2` provides the existing commi
 
 1. Collect field feedback and verify provider/wearing behaviour.
 2. Keep the security policy current. GitHub private vulnerability reporting was enabled by the owner and verified on 6 November 2026; SECURITY.md links to the private report form.
-3. Decide when to issue a stable release and request catalog inclusion. Catalog submission remains a separate authorized action.
+3. Follow the existing catalog submission and decide when field feedback supports a stable release. Maintainer acceptance is outstanding.
 
 Publication runs only on a manual dispatch or a change to the explicit versioned release-request path. Routine documentation changes cannot trigger publication. Future versions need their own approved request, reviewed target, validation evidence and checksum.
 
@@ -47,4 +47,8 @@ Requirements checked on 6 November 2026:
 
 ## 0.3.0b1
 
-The owner authorized completing release work on 7 November 2026 after the approved live pilot. Publish only the exact commit that passes tests/build, hassfest and Marketplace checks, with the deterministic install ZIP and SHA256SUMS. See [what changed](docs/releases/0.3.0b1.md). Catalog submission [hacs/default#13509](https://github.com/hacs/default/pull/13509) remains open with no maintainer feedback at the pre-release check. Acceptance and field accuracy are not claimed.
+[0.3.0b1 is published](https://github.com/squizzer73/ha-person-presence/releases/tag/0.3.0b1), following the owner's approval on 7 November 2026. It tags `8f7ecc0306c166d68356ccb2b7270e1b28b1bf78`, validated by [run 42324172437](https://github.com/squizzer73/ha-person-presence/actions/runs/42324172437). All three jobs passed without ignored checks. The initial manifest-ordering failure was corrected with a packaging regression before publication.
+
+[Publisher run 42324358041](https://github.com/squizzer73/ha-person-presence/actions/runs/42324358041) rebuilt the pinned source, checked the expected checksum, attached the ZIP and SHA256SUMS and published the prerelease. Public download bytes, checksum file, tag and notes were independently verified. ZIP SHA256: `eb8c45562e3b40acd53eae5f90e5e24e0474defa6129b41928c8f1669dfd6e87`. The installed pilot runtime matches this public ZIP. Only manifest key ordering needed synchronization after the prior pilot restart; parsed settings stayed identical and no further restart was needed. The publisher administration commit passed all three jobs in [run 42324357971](https://github.com/squizzer73/ha-person-presence/actions/runs/42324357971).
+
+See [what changed](docs/releases/0.3.0b1.md). Catalog submission [hacs/default#13509](https://github.com/hacs/default/pull/13509) remains open with no maintainer comments/reviews at the release check. The GitHub connector cannot update the upstream PR description (403); updated release/check links are prepared for the owner to paste. Acceptance and physical accuracy are not claimed.
