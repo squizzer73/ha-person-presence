@@ -45,6 +45,14 @@ class Release(unittest.TestCase):
                     archive.read("custom_components/person_presence/manifest.json")
                 )
                 self.assertEqual(manifest["version"], "0.3.0b1")
+                self.assertEqual(
+                    list(manifest),
+                    [
+                        "domain",
+                        "name",
+                        *sorted(k for k in manifest if k not in ("domain", "name")),
+                    ],
+                )
                 for name in names:
                     self.assertEqual(archive.read(name), (ROOT / name).read_bytes())
             export = Path(directory) / "repository"
